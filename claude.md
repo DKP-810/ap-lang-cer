@@ -17,32 +17,68 @@ All content is thematically tied to the **2011 AP Lang Argument prompt** (Thomas
 
 | File | Purpose | Runtime |
 |------|---------|---------|
-| `ap_lang_argument_cheat_sheet.html` | One-page printable C.E.R. reference sheet for students | Static HTML, no dependencies |
+| `index.html` | Landing page linking to all three activities + cheat sheet | GitHub Pages |
+| `gauntlet.html` | Reasoning Gauntlet activity | GitHub Pages, uses `config.js` + `api.js` |
+| `diagnosis-lab.html` | Diagnosis Lab activity | GitHub Pages, uses `config.js` + `api.js` |
+| `step-builder.html` | C.E.R. Step-Builder activity | GitHub Pages, uses `config.js` + `api.js` |
+| `cheat-sheet.html` | One-page printable C.E.R. reference sheet | Static HTML, no dependencies |
+| `config.js` | Shared API key + password config (key is a placeholder in source) | Injected at deploy time via GitHub Actions |
+| `styles.css` | Shared dark theme, typography, button styles | All activity pages |
+| `api.js` | Shared Gemini API call function with error handling and header auth | All activity pages |
 | `reasoning_gauntlet.jsx` | Claude.ai artifact version of the Gauntlet | Runs inside Claude.ai chat using built-in Anthropic API access |
-| `reasoning_gauntlet_standalone.html` | Deployable standalone Reasoning Gauntlet | Runs on Netlify (or any static host), uses Gemini API |
-| `diagnosis_lab_standalone.html` | Deployable standalone Diagnosis Lab | Runs on Netlify, uses Gemini API |
-| `step_builder_standalone.html` | Deployable standalone C.E.R. Step-Builder | Runs on Netlify, uses Gemini API |
+| `reasoning_gauntlet_standalone.html` | Legacy standalone Reasoning Gauntlet | Netlify drag-and-drop (no git deployment) |
+| `diagnosis_lab_standalone.html` | Legacy standalone Diagnosis Lab | Netlify drag-and-drop (no git deployment) |
+| `step_builder_standalone.html` | Legacy standalone C.E.R. Step-Builder | Netlify drag-and-drop (no git deployment) |
+| `ap_lang_argument_cheat_sheet.html` | Legacy printable cheat sheet | Static HTML |
 | `gemini_key_tester.html` | Debug tool for testing Gemini API keys | Open locally — but NOTE: local file testing triggers CORS errors (see bugs) |
+| `.github/workflows/deploy.yml` | GitHub Actions workflow: injects API key at build time, deploys to GitHub Pages | Runs on every push to `main` |
 
 ---
 
-## Deployment: Standalone Activities (Netlify + Gemini)
+## Deployment: GitHub Pages (Primary)
 
-### Setup Steps (same for all three activities)
-1. Get a free Gemini API key at https://aistudio.google.com/apikey — use "Create API key in new project" for cleanest setup
-2. Open the HTML file in a text editor
-3. Find the CONFIG section near the top of the `<script>` block and replace `YOUR_GEMINI_API_KEY_HERE` with the actual key
-4. **Each file needs the key pasted separately** — there's no shared config yet (planned for Claude Code refactor)
-5. Rename the file to `index.html` (or set up a multi-page site — see "Next Steps" below)
-6. Place `index.html` inside a **new empty folder** (e.g., `gauntlet/`)
-7. Go to https://app.netlify.com/drop
-8. Drag the **entire folder** (not the file) onto the drop zone
-9. Share the resulting URL with students
+Live URL: **https://dkp-810.github.io/ap-lang-cer/**
+Repo: **https://github.com/DKP-810/ap-lang-cer/**
+
+### How it works
+The API key is **never stored in the repository source**. `config.js` contains the placeholder `YOUR_GEMINI_API_KEY_HERE`. The GitHub Actions workflow (`.github/workflows/deploy.yml`) runs `sed` to inject the real key from a GitHub repository secret at build time before deploying to GitHub Pages.
+
+### To deploy an update
+```bash
+git add .
+git commit -m "your message here"
+git push origin main
+```
+The Actions workflow triggers automatically. Watch progress at https://github.com/DKP-810/ap-lang-cer/actions.
+
+### API Key Setup (if key needs to be rotated)
+1. Get a new key at https://aistudio.google.com/apikey — "Create API key in new project"
+2. In Google Cloud Console → Credentials → edit the key:
+   - **HTTP referrer restrictions:** Add both `https://dkp-810.github.io/*` and `https://dkp-810.github.io/ap-lang-cer/*`
+   - **API restrictions:** Restrict to "Generative Language API" only
+3. Go to GitHub repo → **Settings → Secrets and variables → Actions** → update the `GEMINI_API_KEY` secret
+4. Push any change to `main` to trigger a redeploy with the new key
 
 ### Critical Details
-- **Password:** `APLangRulez` (stored in the CONFIG section, same area as API key)
-- **Redeployment:** To update, go to the Netlify site → Deploys tab → drag the updated folder onto the deploy area. Dragging a single file does NOT work reliably; always use a folder.
-- **API key security:** The key is embedded in client-side JavaScript. Since it's a free-tier key with rate limits, real-world risk in a classroom context is negligible. The password gate prevents casual access.
+- **Password:** `APLangRulez` (stored in `config.js`)
+- **Key in source:** Always the placeholder `YOUR_GEMINI_API_KEY_HERE` — never the real key
+- **GitHub secret scanning:** Will flag any real key committed to the repo and revoke it. The workflow approach prevents this entirely.
+- **Referrer restriction gotcha:** Must allow `https://dkp-810.github.io/*` (root domain wildcard), not just `/ap-lang-cer/*`. Browsers send the root origin as the referer header. See Bug #8.
+
+---
+
+## Deployment: Standalone Activities (Netlify — Legacy)
+
+The three `*_standalone.html` files are the original single-file versions. Still usable for Netlify drag-and-drop deployment without git. **Do not push these files with a real API key to any public repo.**
+
+### Setup Steps
+1. Get a free Gemini API key at https://aistudio.google.com/apikey
+2. Open the HTML file and replace `YOUR_GEMINI_API_KEY_HERE` in the CONFIG section with the actual key
+3. Place the file (renamed `index.html`) inside a folder and drag the folder to https://app.netlify.com/drop
+
+### Critical Details
+- **Password:** `APLangRulez`
+- **Redeployment:** Always drag a folder, not a single file.
 
 ---
 
@@ -100,7 +136,12 @@ All content is thematically tied to the **2011 AP Lang Argument prompt** (Thomas
   btn.textContent = "SUBMIT " + step.toUpperCase();
   ```
 
-### 7. Step-Builder Submit Button Allows Double-Clicks (KNOWN, NOT YET FIXED)
+### 8. Gemini API Referrer Restriction Must Use Root Domain Wildcard
+- **Symptom:** `Requests from referer https://dkp-810.github.io/ are blocked. [status: 403]` even though the page is at `/ap-lang-cer/`
+- **Cause:** Browsers send the root origin (`https://dkp-810.github.io/`) as the HTTP referer header, not the full page path. The restriction `https://dkp-810.github.io/ap-lang-cer/*` doesn't match it.
+- **Fix:** In Google Cloud Console, add `https://dkp-810.github.io/*` as an allowed referrer (keep the path-specific one too). The root domain wildcard is what actually gets matched.
+
+### 9. Step-Builder Submit Button Allows Double-Clicks (KNOWN, NOT YET FIXED)
 - **Symptom:** After feedback renders and the submit button resets, users can click SUBMIT again and fire duplicate API calls for the same text
 - **Cause:** The button re-enables when feedback renders (from bug #6 fix), but isn't hidden or locked during the feedback phase
 - **Recommended fix for Claude Code:** Either hide the submit button entirely when feedback is showing, or disable it when `fb-[step]` has the `.show` class. The textarea should also stay disabled while feedback is visible — only `retryStep()` should re-enable both.
@@ -170,31 +211,13 @@ For AP Lang/Psych student feedback: keep commentary very brief, conversational, 
 
 ---
 
-## Next Steps (Claude Code Refactor)
+## Next Steps
 
-The current architecture is three standalone HTML files. The planned refactor (to be done in Claude Code) should:
+The refactor from standalone HTML files to a multi-page GitHub Pages site is complete. Remaining items:
 
-1. **Create a landing page** (`index.html`) with links to all three activities + the cheat sheet
-2. **Extract shared code:**
-   - `config.js` — API key and password (set once, used everywhere)
-   - `styles.css` — shared dark theme, typography, button styles
-   - `api.js` — shared Gemini API call function with error handling and header auth
-3. **Add a back-to-home button** on each activity page
-4. **Consider a serverless proxy** (Netlify Functions) to hide the API key from client-side code
-5. **Folder structure:**
-   ```
-   /
-   ├── index.html (landing page)
-   ├── gauntlet.html
-   ├── diagnosis-lab.html
-   ├── step-builder.html
-   ├── cheat-sheet.html
-   ├── config.js
-   ├── styles.css
-   └── api.js
-   ```
-
-All bugs documented below are already fixed in the current standalone files (except #7). The Claude Code session should carry these fixes forward.
+1. **Fix Bug #9** (Step-Builder double-click) — hide or disable the submit button while feedback is visible
+2. **Add the Reasoning Gauntlet** to the refactored multi-page structure (`gauntlet.html`) — currently only the Claude.ai JSX version exists in the refactored codebase
+3. **Consider a serverless proxy** (Netlify Functions) if the key ever needs to be truly hidden from View Source — low priority given domain restrictions already in place
 
 ### Recurring Bug Pattern: Button/Input State Management
 Three of the seven bugs (#3, #6, #7) stem from the same root issue: submit buttons and textareas get `disabled = true` during API calls but aren't consistently re-enabled or hidden across all code paths (success, failure, retry, advance). **When refactoring, centralize UI state management** — a single `setPhaseState(phase)` function that handles which elements are visible, enabled, and focused for each phase would eliminate this entire class of bugs.
