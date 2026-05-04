@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The C.E.R. Step-Builder</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Step-Builder uses three colors, no single --accent */
+  :root {
+    --accent: #e05252;  /* used for title + gate; C color */
+    --c-color: #e05252;
+    --e-color: #f59e0b;
+    --r-color: #52b4e0;
+  }
+
+  #app { max-width: 740px; }
+  #gate button { color: #fff; }
+  .title-row h1 { color: var(--c-color); }
+
+  /* Step Progress */
+  .step-progress {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+  .step-node {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    border: 2.5px solid #333;
+    color: #555;
+    background: var(--bg);
+    transition: all 0.3s;
+    flex-shrink: 0;
+    font-family: var(--mono);
+  }
+  .step-node.active-c { border-color: var(--c-color); color: var(--c-color); background: rgba(224,82,82,0.1); }
+  .step-node.active-e { border-color: var(--e-color); color: var(--e-color); background: rgba(245,158,11,0.1); }
+  .step-node.active-r { border-color: var(--r-color); color: var(--r-color); background: rgba(82,180,224,0.1); }
+  .step-node.done { border-color: var(--pass); color: var(--pass); background: rgba(34,197,94,0.1); }
+  .step-connector { flex: 1; height: 2px; background: #333; transition: background 0.3s; }
+  .step-connector.done { background: var(--pass); }
+
+  /* Prompt Card */
+  .prompt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .prompt-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-faint);
+  }
+  .prompt-text {
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.65;
+    color: #d4d0c8;
+  }
+
+  /* Challenge Box */
+  .challenge-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .challenge-box strong { color: var(--text); }
+
+  /* Locked sections */
+  .locked-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  .locked-section.unlocked { opacity: 1; border-color: var(--pass); }
+  .locked-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .locked-text {
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: #d4d0c8;
+  }
+
+  .input-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    gap: 10px;
+  }
+  .word-count { flex: 1; text-align: center; }
+
+  /* Colored submit buttons */
+  .submit-btn.c-btn { background: var(--c-color); color: #fff; }
+  .submit-btn.e-btn { background: var(--e-color); color: var(--bg); }
+  .submit-btn.r-btn { background: var(--r-color); color: #fff; }
+
+  .secondary-btn {
+    border: 1px solid;
+    color: inherit;
+  }
+
+  /* Inline feedback blocks */
+  .feedback-inline {
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin-top: 12px;
+    display: none;
+  }
+  .feedback-inline.show { display: block; }
+  .feedback-verdict {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .feedback-body {
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.5;
+    color: #d4d0c8;
+  }
+  .feedback-nudge {
+    font-family: var(--serif);
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  /* Complete / Assembled Paragraph */
+  .complete-card {
+    text-align: center;
+    padding: 40px 30px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-top: 20px;
+  }
+  .complete-card h1 { color: var(--c-color); margin-bottom: 10px; }
+  .assembled-paragraph {
+    text-align: left;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  .assembled-label { font-size: 9px; letter-spacing: 2px; color: var(--text-faint); margin-bottom: 10px; }
+  .assembled-text { font-family: var(--serif); font-size: 15px; line-height: 1.75; color: #d4d0c8; }
+  .assembled-text .cer-c { border-bottom: 2px solid var(--c-color); padding-bottom: 1px; }
+  .assembled-text .cer-e { border-bottom: 2px solid var(--e-color); padding-bottom: 1px; }
+  .assembled-text .cer-r { border-bottom: 2px solid var(--r-color); padding-bottom: 1px; }
+  .cer-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+  .cer-legend span { display: flex; align-items: center; gap: 5px; }
+  .cer-legend .dot { width: 10px; height: 3px; border-radius: 1px; }
+  .reset-btn { border-color: var(--c-color); color: var(--c-color); }
+  .reset-btn:hover { background: rgba(224,82,82,0.08); }
+
+  @media (max-width: 500px) {
+    .step-node { width: 34px; height: 34px; font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <a href="index.html" class="home-link">← HOME</a>
+
+  <div class="header">
+    <div class="title-row">
+      <h1>THE C.E.R. STEP-BUILDER</h1>
+    </div>
+  </div>
+
+  <!-- Step Progress -->
+  <div class="step-progress">
+    <div class="step-node" id="node-c">C</div>
+    <div class="step-connector" id="conn-ce"></div>
+    <div class="step-node" id="node-e">E</div>
+    <div class="step-connector" id="conn-er"></div>
+    <div class="step-node" id="node-r">R</div>
+  </div>
+
+  <!-- Prompt -->
+  <div class="prompt-card">
+    <div class="prompt-label">THE PROMPT — CURBELO ON PERSUASION (2018)</div>
+    <div class="prompt-text">
+      Write an essay that argues your position on the extent to which Curbelo's claim about persuading others is valid. Take a <strong>defensible position</strong> and support it with <strong>appropriate evidence</strong>.
+    </div>
+  </div>
+
+  <!-- Curbelo Quote (collapsible) -->
+  <details style="margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:0;">
+    <summary style="padding:10px 16px;font-size:11px;letter-spacing:2px;color:var(--text-dim);cursor:pointer;font-family:var(--mono);">VIEW CURBELO'S STATEMENT</summary>
+    <div style="padding:4px 16px 14px;font-family:var(--serif);font-size:13px;line-height:1.7;color:#b0a880;font-style:italic;">
+      "If you're trying to convince someone that they need to get involved in an issue or perhaps change their thinking on an issue, trying to scare them is not always effective and can actually sow resentment."
+      <div style="margin-top:8px;font-size:11px;font-style:normal;color:var(--text-faint);letter-spacing:1px;">— Carlos Curbelo, then U.S. Representative, 2018 interview on the importance of collaboration</div>
+    </div>
+  </details>
+
+  <!-- Phase: Start -->
+  <div id="phase-start">
+    <button class="start-btn" onclick="startBuilder()">BEGIN BUILDING</button>
+  </div>
+
+  <!-- Phase: Claim -->
+  <div id="phase-claim" style="display:none;">
+    <div class="challenge-box" style="border-color:rgba(224,82,82,0.3);background:rgba(224,82,82,0.05);color:#c8b0b0;">
+      <span>📌</span>
+      <span><strong>STEP 1 — CLAIM:</strong> Write a defensible thesis that takes a clear position on Paine's characterization. Don't just summarize the passage — argue something about it.</span>
+    </div>
+    <textarea id="claim-input" placeholder="Write your claim / thesis here..."></textarea>
+    <div class="input-footer">
+      <div class="word-count" id="claim-wc">0 words</div>
+      <button class="submit-btn c-btn" id="claim-btn" onclick="submitStep('claim')">SUBMIT CLAIM</button>
+    </div>
+    <div class="error-box" id="error-claim"></div>
+    <div class="feedback-inline" id="fb-claim" style="border:1px solid rgba(224,82,82,0.3);background:rgba(224,82,82,0.05);"></div>
+  </div>
+
+  <!-- Phase: Evidence -->
+  <div id="phase-evidence" style="display:none;">
+    <div class="locked-section unlocked" id="locked-claim">
+      <div class="locked-label" style="color:var(--c-color);">YOUR CLAIM ✓</div>
+      <div class="locked-text" id="locked-claim-text"></div>
+    </div>
+    <div class="challenge-box" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.05);color:#c8c0b0;">
+      <span>📋</span>
+      <span><strong>STEP 2 — EVIDENCE:</strong> Provide specific, concrete evidence that supports your claim. Names, dates, events, data — not vague gestures. You can use historical examples, current events, personal experience, or data.</span>
+    </div>
+    <textarea id="evidence-input" placeholder="Write your evidence here..."></textarea>
+    <div class="input-footer">
+      <div class="word-count" id="evidence-wc">0 words</div>
+      <button class="submit-btn e-btn" id="evidence-btn" onclick="submitStep('evidence')">SUBMIT EVIDENCE</button>
+    </div>
+    <div class="error-box" id="error-evidence"></div>
+    <div class="feedback-inline" id="fb-evidence" style="border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.05);"></div>
+  </div>
+
+  <!-- Phase: Reasoning -->
+  <div id="phase-reasoning" style="display:none;">
+    <div class="locked-section unlocked" id="locked-claim-2">
+      <div class="locked-label" style="color:var(--c-color);">YOUR CLAIM ✓</div>
+      <div class="locked-text" id="locked-claim-text-2"></div>
+    </div>
+    <div class="locked-section unlocked" id="locked-evidence">
+      <div class="locked-label" style="color:var(--e-color);">YOUR EVIDENCE ✓</div>
+      <div class="locked-text" id="locked-evidence-text"></div>
+    </div>
+    <div class="challenge-box" style="border-color:rgba(82,180,224,0.3);background:rgba(82,180,224,0.05);color:#b0c0c8;">
+      <span>🔗</span>
+      <span><strong>STEP 3 — REASONING:</strong> Now write the "so what?" — explain WHY your evidence proves your claim. Don't restate the evidence. Don't restate the claim. Add a new analytical layer that connects the two.</span>
+    </div>
+    <textarea id="reasoning-input" placeholder="Write your reasoning here..."></textarea>
+    <div class="input-footer">
+      <div class="word-count" id="reasoning-wc">0 words</div>
+      <button class="submit-btn r-btn" id="reasoning-btn" onclick="submitStep('reasoning')">SUBMIT REASONING</button>
+    </div>
+    <div class="error-box" id="error-reasoning"></div>
+    <div class="feedback-inline" id="fb-reasoning" style="border:1px solid rgba(82,180,224,0.3);background:rgba(82,180,224,0.05);"></div>
+  </div>
+
+  <!-- Complete -->
+  <div id="complete-screen" style="display:none;">
+    <div class="complete-card">
+      <div style="font-size:40px;margin-bottom:12px;">🏗️</div>
+      <h1>PARAGRAPH BUILT</h1>
+      <p style="color:var(--text-dim);font-size:14px;">Here's your assembled argument paragraph with each C.E.R. component marked:</p>
+      <div class="assembled-paragraph">
+        <div class="assembled-label">YOUR ASSEMBLED PARAGRAPH</div>
+        <div class="assembled-text" id="assembled-text"></div>
+      </div>
+      <div class="cer-legend">
+        <span><span class="dot" style="background:var(--c-color);"></span> CLAIM</span>
+        <span><span class="dot" style="background:var(--e-color);"></span> EVIDENCE</span>
+        <span><span class="dot" style="background:var(--r-color);"></span> REASONING</span>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">BUILD ANOTHER</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+if (sessionStorage.getItem("auth") !== "1") { window.location.href = "index.html"; }
+document.getElementById("app").style.display = "block";
+
+const PROMPTS = {
+  claim: `You are an AP Language and Composition writing coach. Evaluate this student's CLAIM (thesis) for an argument essay about the extent to which Curbelo's claim about fear-based persuasion is valid.
+
+A good claim:
+- Takes a DEFENSIBLE POSITION (arguable, not a fact or summary)
+- Is QUALIFIABLE (not absolute — uses "largely," "to a significant extent," "when X," etc.)
+- Addresses the PROMPT (the extent to which Curbelo's claim holds true)
+- Is SPECIFIC enough to guide body paragraphs
+
+RESPOND ONLY with JSON:
+{"verdict": "PASS or PUSH HARDER or TRY AGAIN", "analysis": "2 sentences max. Be conversational, direct, specific. If the claim just restates Curbelo or states an obvious fact, call it out. If it's defensible, say what makes it work.", "nudge": "1 sentence — concrete fix if needed, or brief acknowledgment if passed."}
+
+CALIBRATION:
+- PASS = Defensible, arguable, addresses the prompt, specific enough to build on
+- PUSH HARDER = Has a position but it's too vague, too absolute, or doesn't fully address the prompt
+- TRY AGAIN = Summary, fact, or doesn't take a position at all`,
+
+  evidence: `You are an AP Language and Composition writing coach. Evaluate this student's EVIDENCE for an argument essay about the validity of Curbelo's claim that fear-based persuasion is not always effective and can sow resentment.
+
+Their CLAIM (already approved): {claim}
+
+Good evidence:
+- Is SPECIFIC (names, dates, details — not vague gestures)
+- Is RELEVANT to the claim (directly supports the position on Curbelo's argument)
+- Goes beyond surface-level examples
+
+RESPOND ONLY with JSON:
+{"verdict": "PASS or PUSH HARDER or TRY AGAIN", "analysis": "2 sentences max. If the evidence is too vague ('throughout history, many things happened'), call it out. If it's specific and relevant, say why it works for their claim.", "nudge": "1 sentence — concrete fix or acknowledgment."}
+
+CALIBRATION:
+- PASS = Specific, concrete, clearly relevant to the claim
+- PUSH HARDER = Relevant but too vague, or specific but not clearly connected to the claim
+- TRY AGAIN = No real evidence offered, or completely irrelevant to the claim`,
+
+  reasoning: `You are an AP Language and Composition writing coach. Evaluate this student's REASONING — the analytical connector between their claim and evidence.
+
+Their CLAIM: {claim}
+Their EVIDENCE: {evidence}
+
+Good reasoning:
+- CONNECTS evidence to claim (explains the logical link)
+- ADDS AN ANALYTICAL LAYER (interpretation, not restatement)
+- MOVES the argument FORWARD
+
+COMMON FAILURES: "The Parrot" (restates evidence), "The Echo" (restates claim), "The Generalizer" (vague platitude), "The Drifter" (goes off-topic)
+
+RESPOND ONLY with JSON:
+{"verdict": "PASS or PUSH HARDER or TRY AGAIN", "analysis": "2 sentences max. Diagnose specifically. Quote their words if pointing out a problem. If they added genuine analytical depth, say what worked.", "nudge": "1 sentence — concrete fix or acknowledgment."}
+
+CALIBRATION:
+- PASS = Genuine analytical connection between evidence and claim
+- PUSH HARDER = Attempts connection but too surface-level or vague
+- TRY AGAIN = Restatement, tangent, or not functioning as reasoning`
+};
+
+let approvedClaim = "";
+let approvedEvidence = "";
+let approvedReasoning = "";
+
+["claim", "evidence", "reasoning"].forEach(function(step) {
+  document.getElementById(step + "-input").addEventListener("input", function() {
+    const w = this.value.trim() ? this.value.trim().split(/\s+/).length : 0;
+    document.getElementById(step + "-wc").textContent = w + " words";
+  });
+});
+
+function startBuilder() {
+  document.getElementById("phase-start").style.display = "none";
+  document.getElementById("phase-claim").style.display = "block";
+  document.getElementById("node-c").classList.add("active-c");
+  document.getElementById("claim-input").focus();
+}
+
+async function submitStep(step) {
+  const input = document.getElementById(step + "-input");
+  const text = input.value.trim();
+  const errorBox = document.getElementById("error-" + step);
+  const btn = document.getElementById(step + "-btn");
+
+  const minWords = step === "claim" ? 8 : 10;
+  if (!text || text.split(/\s+/).length < minWords) {
+    errorBox.textContent = step === "claim"
+      ? "A thesis needs at least a full sentence."
+      : "Give me more to work with — at least a couple sentences.";
+    errorBox.classList.add("show");
+    return;
+  }
+
+  errorBox.classList.remove("show");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>ANALYZING...';
+  input.disabled = true;
+
+  let systemPrompt = PROMPTS[step]
+    .replace("{claim}", approvedClaim)
+    .replace("{evidence}", approvedEvidence);
+
+  try {
+    const parsed = await callGemini(systemPrompt, `STUDENT'S ${step.toUpperCase()}:\n${text}`);
+    showStepFeedback(step, text, parsed);
+  } catch (err) {
+    errorBox.textContent = "Connection issue — " + (err.message || "try again.");
+    errorBox.classList.add("show");
+    btn.disabled = false;
+    btn.textContent = "SUBMIT " + step.toUpperCase();
+    input.disabled = false;
+  }
+}
+
+function showStepFeedback(step, text, feedback) {
+  // Reset button text (stop spinner) but keep disabled while feedback is visible
+  // FIX for Bug #7: button only re-enables via retryStep()
+  const btn = document.getElementById(step + "-btn");
+  btn.disabled = true;
+  btn.textContent = "SUBMIT " + step.toUpperCase();
+
+  const fb = document.getElementById("fb-" + step);
+  const color = feedback.verdict === "PASS" ? "var(--pass)" :
+                feedback.verdict === "PUSH HARDER" ? "var(--warn)" : "var(--fail)";
+  const nudgeColor = step === "claim" ? "var(--c-color)" : step === "evidence" ? "var(--e-color)" : "var(--r-color)";
+
+  let html = `<div class="feedback-verdict" style="color:${color}">${feedback.verdict}</div>`;
+  html += `<div class="feedback-body">${feedback.analysis || ""}</div>`;
+  if (feedback.nudge) {
+    html += `<div class="feedback-nudge" style="color:${nudgeColor}">${feedback.nudge}</div>`;
+  }
+
+  html += '<div class="btn-row">';
+  if (feedback.verdict !== "PASS") {
+    html += `<button class="secondary-btn" style="border-color:${color};color:${color}" onclick="retryStep('${step}')">REVISE</button>`;
+  }
+  if (feedback.verdict === "PASS") {
+    if (step === "reasoning") {
+      html += `<button class="ghost-btn" onclick="finishBuild()">SEE FULL PARAGRAPH →</button>`;
+    } else {
+      const nextStep = step === "claim" ? "evidence" : "reasoning";
+      html += `<button class="ghost-btn" onclick="advanceStep('${step}','${nextStep}')">NEXT: ${nextStep.toUpperCase()} →</button>`;
+    }
+  } else {
+    if (step === "reasoning") {
+      html += `<button class="ghost-btn" onclick="forceAdvance('${step}');finishBuild()">SKIP →</button>`;
+    } else {
+      const nextStep = step === "claim" ? "evidence" : "reasoning";
+      html += `<button class="ghost-btn" onclick="forceAdvance('${step}');advanceStep('${step}','${nextStep}')">SKIP →</button>`;
+    }
+  }
+  html += '</div>';
+
+  fb.innerHTML = html;
+  fb.classList.add("show");
+
+  if (feedback.verdict === "PASS") {
+    if (step === "claim") approvedClaim = text;
+    else if (step === "evidence") approvedEvidence = text;
+    else approvedReasoning = text;
+
+    document.getElementById("node-" + step[0]).classList.remove("active-c", "active-e", "active-r");
+    document.getElementById("node-" + step[0]).classList.add("done");
+  }
+
+  fb.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function retryStep(step) {
+  const input = document.getElementById(step + "-input");
+  input.disabled = false;
+  const btn = document.getElementById(step + "-btn");
+  btn.disabled = false;
+  btn.textContent = "SUBMIT " + step.toUpperCase();
+  document.getElementById("fb-" + step).classList.remove("show");
+  input.focus();
+}
+
+function forceAdvance(step) {
+  const text = document.getElementById(step + "-input").value.trim();
+  if (step === "claim") approvedClaim = text;
+  else if (step === "evidence") approvedEvidence = text;
+  else approvedReasoning = text;
+
+  document.getElementById("node-" + step[0]).classList.remove("active-c", "active-e", "active-r");
+  document.getElementById("node-" + step[0]).classList.add("done");
+}
+
+function advanceStep(fromStep, toStep) {
+  if (fromStep === "claim") document.getElementById("conn-ce").classList.add("done");
+  if (fromStep === "evidence") document.getElementById("conn-er").classList.add("done");
+
+  document.getElementById("phase-" + toStep).style.display = "block";
+
+  const nodeClass = toStep === "evidence" ? "active-e" : "active-r";
+  document.getElementById("node-" + toStep[0]).classList.add(nodeClass);
+
+  if (toStep === "evidence") {
+    document.getElementById("locked-claim-text").textContent = approvedClaim;
+  }
+  if (toStep === "reasoning") {
+    document.getElementById("locked-claim-text-2").textContent = approvedClaim;
+    document.getElementById("locked-evidence-text").textContent = approvedEvidence;
+  }
+
+  document.getElementById(toStep + "-input").focus();
+  document.getElementById("phase-" + toStep).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function finishBuild() {
+  if (!approvedReasoning) approvedReasoning = document.getElementById("reasoning-input").value.trim();
+
+  document.getElementById("node-r").classList.remove("active-r");
+  document.getElementById("node-r").classList.add("done");
+  document.getElementById("conn-er").classList.add("done");
+
+  ["phase-claim", "phase-evidence", "phase-reasoning"].forEach(id => {
+    document.getElementById(id).style.display = "none";
+  });
+
+  const assembled = document.getElementById("assembled-text");
+  assembled.innerHTML =
+    `<span class="cer-c">${escapeHtml(approvedClaim)}</span> ` +
+    `<span class="cer-e">${escapeHtml(approvedEvidence)}</span> ` +
+    `<span class="cer-r">${escapeHtml(approvedReasoning)}</span>`;
+
+  document.getElementById("complete-screen").style.display = "block";
+  document.getElementById("complete-screen").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function resetAll() {
+  approvedClaim = "";
+  approvedEvidence = "";
+  approvedReasoning = "";
+
+  ["claim", "evidence", "reasoning"].forEach(function(step) {
+    document.getElementById(step + "-input").value = "";
+    document.getElementById(step + "-input").disabled = false;
+    document.getElementById(step + "-wc").textContent = "0 words";
+    document.getElementById(step + "-btn").disabled = false;
+    document.getElementById(step + "-btn").textContent = "SUBMIT " + step.toUpperCase();
+    document.getElementById("fb-" + step).classList.remove("show");
+    document.getElementById("fb-" + step).innerHTML = "";
+    document.getElementById("error-" + step).classList.remove("show");
+    document.getElementById("phase-" + step).style.display = "none";
+  });
+
+  ["c", "e", "r"].forEach(function(l) {
+    document.getElementById("node-" + l).className = "step-node";
+  });
+  document.getElementById("conn-ce").classList.remove("done");
+  document.getElementById("conn-er").classList.remove("done");
+
+  document.getElementById("phase-start").style.display = "";
+  document.getElementById("complete-screen").style.display = "none";
+}
+</script>
+</body>
+</html>

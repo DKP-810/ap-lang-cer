@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Reasoning Gauntlet</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Gauntlet accent: amber */
+  :root {
+    --accent: #f59e0b;
+    --accent-dim: #3d3a20;
+    --accent-bg: #1a1a0e;
+  }
+
+  #app { max-width: 720px; }
+
+  /* Prompt Card */
+  .prompt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .prompt-section { padding: 16px 20px; }
+  .prompt-section + .prompt-section { border-top: 1px solid var(--border); }
+  .prompt-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .prompt-text {
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.6;
+    color: #d4d0c8;
+  }
+
+  /* Challenge Box */
+  .challenge-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #c8c4b8;
+    line-height: 1.5;
+  }
+  .challenge-box strong { color: var(--text); }
+
+  /* Input Area */
+  .input-area { margin-bottom: 16px; }
+  textarea { min-height: 140px; }
+
+  .input-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    gap: 10px;
+  }
+  .hint-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .hint-btn:hover { border-color: var(--text-dim); }
+  .word-count { flex: 1; text-align: center; }
+  .submit-btn { color: var(--bg); }
+
+  .hint-box {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.5;
+    color: #b0a880;
+    display: none;
+  }
+  .hint-box.show { display: block; }
+  .hint-box strong { color: var(--accent); font-family: var(--mono); font-size: 11px; }
+
+  /* Feedback */
+  .feedback-area { display: none; margin-top: 8px; }
+  .feedback-area.show { display: block; }
+
+  .diagnosis-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .diagnosis-text {
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.6;
+    color: #d4d0c8;
+  }
+
+  .their-response {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+  }
+  .their-response-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+  .their-response-text {
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .feedback-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .retry-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .retry-btn:hover { background: rgba(245,158,11,0.08); }
+  .next-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #999;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .next-btn:hover { border-color: #888; color: #ccc; }
+
+  .reset-btn:hover { background: rgba(245,158,11,0.08); }
+
+  @media (max-width: 500px) {
+    .input-footer { flex-wrap: wrap; }
+    .word-count { order: 3; flex-basis: 100%; text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <a href="index.html" class="home-link">← HOME</a>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="title-row">
+      <h1>THE REASONING GAUNTLET</h1>
+      <div class="round-badge"><span id="round-num">1</span><span class="total">/5</span></div>
+    </div>
+    <div class="difficulty-bar" id="difficulty-bar">
+      <div class="pip" id="pip-0"></div>
+      <div class="pip" id="pip-1"></div>
+      <div class="pip" id="pip-2"></div>
+      <div class="pip" id="pip-3"></div>
+      <div class="pip" id="pip-4"></div>
+      <span class="difficulty-label" id="difficulty-label"></span>
+    </div>
+  </div>
+
+  <!-- Prompt Card -->
+  <div class="prompt-card">
+    <div class="prompt-section">
+      <div class="prompt-label">CLAIM</div>
+      <div class="prompt-text" id="claim-text"></div>
+    </div>
+    <div class="prompt-section">
+      <div class="prompt-label">EVIDENCE</div>
+      <div class="prompt-text" id="evidence-text"></div>
+    </div>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box">
+    <span>✍</span>
+    <span>Write the <strong>reasoning</strong> — the "so what?" that connects this evidence to this claim.</span>
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area" id="input-area">
+    <button class="start-btn" id="start-btn" onclick="startRound()">BEGIN ROUND 1</button>
+    <div id="writing-area" style="display:none;">
+      <textarea id="response-input" placeholder="Your reasoning goes here..."></textarea>
+      <div class="input-footer">
+        <button class="hint-btn" onclick="toggleHint()">SHOW HINT</button>
+        <div class="word-count" id="word-count">0 words</div>
+        <button class="submit-btn" id="submit-btn" onclick="submitResponse()">SUBMIT</button>
+      </div>
+      <div class="hint-box" id="hint-box"></div>
+      <div class="error-box" id="error-box"></div>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="feedback-area" id="feedback-area">
+    <div class="verdict-banner" id="verdict-banner">
+      <span class="verdict-text" id="verdict-text"></span>
+      <span id="verdict-check"></span>
+    </div>
+    <div class="diagnosis-box">
+      <div class="diagnosis-text" id="diagnosis-text"></div>
+      <div class="nudge-text" id="nudge-text"></div>
+    </div>
+    <div class="their-response">
+      <div class="their-response-label">YOUR RESPONSE</div>
+      <div class="their-response-text" id="their-response-text"></div>
+    </div>
+    <div class="feedback-actions" id="feedback-actions"></div>
+  </div>
+
+  <!-- Complete Screen -->
+  <div id="complete-screen" style="display:none;">
+    <div class="complete-card">
+      <div id="complete-emoji" style="font-size:40px;margin-bottom:12px;"></div>
+      <h1>GAUNTLET COMPLETE</h1>
+      <div class="complete-score" id="complete-score"></div>
+      <div class="results-list" id="results-list"></div>
+      <button class="reset-btn" onclick="resetAll()">RUN IT AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+if (sessionStorage.getItem("auth") !== "1") { window.location.href = "index.html"; }
+document.getElementById("app").style.display = "block";
+
+const ROUNDS = [
+  {
+    difficulty: "WARM-UP",
+    claim: "Curbelo's claim is valid: fear-based persuasion tactics frequently fail to change minds and may produce the opposite of their intended effect.",
+    evidence: "The D.A.R.E. (Drug Abuse Resistance Education) program, launched in 1983 and eventually implemented in over 75% of American school districts, relied heavily on fear-based messaging about drug consequences — showing students graphic worst-case outcomes and invoking images of addiction and ruin. A 1994 study commissioned by the U.S. Department of Justice found that D.A.R.E. graduates showed no statistically significant difference in drug use compared to non-participants, and several follow-up analyses found marginally higher use rates among program alumni.",
+    hint: "Don't just restate that D.A.R.E. didn't work — explain WHY the failure happened and what it reveals about how fear tactics affect audiences, specifically in terms of Curbelo's warning about 'sowing resentment.'"
+  },
+  {
+    difficulty: "STANDARD",
+    claim: "Curbelo's warning is especially applicable to climate change communication, where alarm-based messaging has consistently produced disengagement rather than action.",
+    evidence: "A 2009 study by researchers Saffron O'Neill and Sophie Nicholson-Cole, published in Global Environmental Change, examined audience responses to dramatic fear-inducing climate imagery — flooded cities, dying ecosystems, catastrophic storms — and found that such imagery consistently increased feelings of helplessness and personal disengagement rather than motivation to act. Crucially, conservative respondents were most likely to dismiss the messaging as alarmist propaganda and reject both the message and the messenger entirely.",
+    hint: "The evidence gives you TWO effects: general disengagement AND the specific resentment response among conservatives. Strong reasoning explains how both together illustrate Curbelo's point — and pay attention to his distinction between being 'not always effective' and actively 'sowing resentment.'"
+  },
+  {
+    difficulty: "ELEVATED",
+    claim: "Curbelo's caution against fear is sound as a general principle, but historical evidence reveals that fear CAN be effective when the threat is specific, credible, and paired with a clear path to action — complicating any absolute reading of his claim.",
+    evidence: "During the Cuban Missile Crisis, President Kennedy's October 22, 1962 televised address used precisely calibrated fear — naming Soviet missile sites, estimating their range, and describing the threat to American cities — alongside a concrete proposed response (a naval quarantine). Polls showed public support for firm action jumped from 44% to over 80% within days. Yet Kennedy's most celebrated line on fear — 'the only thing we have to fear is fear itself' — was itself a strategic redirection of fear toward productive action, suggesting that even the most famous anti-fear rhetoric is, in practice, a form of fear management rather than fear elimination.",
+    hint: "Both pieces of evidence support AND complicate Curbelo. Kennedy's missile speech shows fear working; the 'nothing to fear' framing shows that even rejecting fear uses fear strategically. Your reasoning must engage with this tension — it can't just pick one side and ignore the other."
+  },
+  {
+    difficulty: "ADVANCED",
+    claim: "Curbelo's claim is most valid when applied to audiences who already feel targeted — in those contexts, fear appeals don't just fail but actively harden resistance, producing exactly the resentment he describes.",
+    evidence: "Research on HIV/AIDS prevention messaging in the 1980s and 1990s found a consistent pattern: graphic fear-based campaigns showing death, disfigurement, and social exclusion drove people in already-stigmatized communities away from testing and treatment, as audiences associated the fear with the messengers — perceived as hostile outsiders — rather than with the disease. Meanwhile, campaigns using affirming, community-rooted messaging produced measurable increases in testing rates within the same populations. The fear campaigns were not merely ineffective; they created documented barriers to care that took years to undo.",
+    hint: "The claim specifies a condition: 'audiences who already feel targeted.' Your reasoning must use the HIV evidence to explain WHY that condition changes how fear operates — not just that it didn't work, but why the pre-existing sense of being targeted transformed fear into resentment toward the messenger."
+  },
+  {
+    difficulty: "BOSS ROUND",
+    claim: "Curbelo's claim contains a buried assumption — that persuaders can choose whether to use fear — that breaks down in genuine crises where honestly communicating a real danger IS the persuasive act, not a tactic layered on top of it.",
+    evidence: "Civil rights leaders in the 1960s made explicit strategic decisions about fear. In his memoir Walking with the Wind, John Lewis describes movement organizers deliberately choosing which emotional appeals to deploy with which audiences: footage of police violence in Birmingham and Selma — disturbing by design — was strategically shared with white Northern moderates who had been unmoved by moral arguments alone. Within Black communities, the same movement relied primarily on solidarity, dignity, and collective purpose. The same cause, two fundamentally different persuasion strategies — selected based on each audience's existing relationship to the threat being named.",
+    hint: "The surface reading is 'the Civil Rights Movement used fear and it worked.' The deeper argument interrogates what Curbelo's claim assumes: that persuaders can simply choose not to scare people. Lewis's account complicates that — sometimes the fear IS the honest truth of the situation. Deep reasoning asks whether Curbelo is giving tactical advice, or making a deeper claim about what persuasion should be."
+  }
+];
+
+const SYSTEM_PROMPT = `You are an AP Language and Composition reasoning coach. Your ONLY job is to evaluate student-written REASONING — the analytical connector between a claim and its evidence.
+
+You will receive:
+- A CLAIM (the sub-argument)
+- EVIDENCE (the supporting proof)
+- The student's REASONING attempt (their "so what?" explanation)
+
+EVALUATE the reasoning using these criteria:
+1. Does it actually CONNECT the evidence to the claim (not just restate either)?
+2. Does it add an ANALYTICAL LAYER — an interpretation, implication, or insight that isn't obvious from the evidence alone?
+3. Does it move the argument FORWARD rather than circling back?
+
+COMMON FAILURE MODES to diagnose:
+- "The Parrot": Just restates the evidence in slightly different words
+- "The Echo": Just restates the claim without adding depth
+- "The Drifter": Goes off on a tangent unrelated to the claim or evidence
+- "The Generalizer": Makes a broad, vague statement ("This shows how divided we are") without specific analytical connection
+- "The Summarizer": Summarizes what the evidence says without explaining WHY it matters for the claim
+
+RESPOND ONLY with a JSON object in this exact format, with no other text:
+{"verdict": "PASS or PUSH HARDER or TRY AGAIN", "diagnosis": "1-2 sentences identifying exactly what the reasoning does well or what failure mode it falls into. Be specific — quote their words back to them when pointing out a problem. Be conversational and direct, no formal language.", "nudge": "1 sentence suggesting a concrete next move if they need to improve, or a brief acknowledgment of what worked if they passed. Keep it tight."}
+
+IMPORTANT CALIBRATION:
+- PASS = The reasoning genuinely adds analytical depth and connects evidence to claim. It doesn't have to be perfect, but it must do real interpretive work.
+- PUSH HARDER = There's something there, but it's too surface-level, too vague, or doesn't fully close the loop between evidence and claim.
+- TRY AGAIN = The response is a restatement, a tangent, or doesn't function as reasoning at all.
+
+Be tough but fair. Most students will earn PUSH HARDER on their first attempt. A PASS should feel earned. Keep all feedback to 2-3 sentences max. No lists, no bullet points. Talk to them like a straight-shooting coach, not a rubric.`;
+
+let currentRound = 0;
+let attempts = 0;
+let roundResults = [];
+let hintVisible = false;
+
+function renderRound() {
+  const round = ROUNDS[currentRound];
+  document.getElementById("round-num").textContent = currentRound + 1;
+  document.getElementById("difficulty-label").textContent = round.difficulty;
+  document.getElementById("claim-text").textContent = round.claim;
+  document.getElementById("evidence-text").textContent = round.evidence;
+  document.getElementById("hint-box").innerHTML = "<strong>HINT:</strong> " + round.hint;
+  document.getElementById("start-btn").textContent = "BEGIN ROUND " + (currentRound + 1);
+
+  for (let i = 0; i < 5; i++) {
+    const pip = document.getElementById("pip-" + i);
+    pip.className = "pip";
+    if (i < currentRound) pip.classList.add("done");
+    else if (i === currentRound) pip.classList.add("active");
+    pip.style.opacity = i <= currentRound ? "1" : "0.4";
+  }
+
+  document.getElementById("start-btn").style.display = "block";
+  document.getElementById("writing-area").style.display = "none";
+  document.getElementById("feedback-area").classList.remove("show");
+  document.getElementById("input-area").style.display = "block";
+  document.getElementById("complete-screen").style.display = "none";
+  document.getElementById("error-box").classList.remove("show");
+  document.getElementById("hint-box").classList.remove("show");
+  document.getElementById("response-input").value = "";
+  document.getElementById("response-input").disabled = false;
+  document.getElementById("submit-btn").disabled = false;
+  document.getElementById("submit-btn").textContent = "SUBMIT";
+  document.getElementById("word-count").textContent = "0 words";
+  document.querySelector(".hint-btn").textContent = "SHOW HINT";
+  hintVisible = false;
+  attempts = 0;
+}
+
+function startRound() {
+  document.getElementById("start-btn").style.display = "none";
+  document.getElementById("writing-area").style.display = "block";
+  document.getElementById("response-input").focus();
+}
+
+function toggleHint() {
+  hintVisible = !hintVisible;
+  document.getElementById("hint-box").classList.toggle("show", hintVisible);
+  document.querySelector(".hint-btn").textContent = hintVisible ? "HIDE HINT" : "SHOW HINT";
+}
+
+document.getElementById("response-input").addEventListener("input", function() {
+  const words = this.value.trim() ? this.value.trim().split(/\s+/).length : 0;
+  document.getElementById("word-count").textContent = words + " words";
+});
+
+async function submitResponse() {
+  const response = document.getElementById("response-input").value.trim();
+  const errorBox = document.getElementById("error-box");
+
+  if (!response || response.split(/\s+/).length < 8) {
+    errorBox.textContent = "Give me at least a full sentence to work with.";
+    errorBox.classList.add("show");
+    return;
+  }
+
+  errorBox.classList.remove("show");
+  attempts++;
+
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner"></span>ANALYZING...';
+  document.getElementById("response-input").disabled = true;
+
+  const round = ROUNDS[currentRound];
+  const userMessage = `ROUND DIFFICULTY: ${round.difficulty}\n\nCLAIM: ${round.claim}\n\nEVIDENCE: ${round.evidence}\n\nSTUDENT'S REASONING:\n${response}`;
+
+  try {
+    const parsed = await callGemini(SYSTEM_PROMPT, userMessage);
+    showFeedback(parsed, response);
+  } catch (err) {
+    errorBox.textContent = "Connection issue — " + (err.message || "try again.");
+    errorBox.classList.add("show");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "SUBMIT";
+    document.getElementById("response-input").disabled = false;
+  }
+}
+
+function showFeedback(feedback, response) {
+  document.getElementById("writing-area").style.display = "none";
+  document.getElementById("start-btn").style.display = "none";
+  const fb = document.getElementById("feedback-area");
+  fb.classList.add("show");
+
+  const color = feedback.verdict === "PASS" ? "var(--pass)" :
+                feedback.verdict === "PUSH HARDER" ? "var(--warn)" : "var(--fail)";
+  const banner = document.getElementById("verdict-banner");
+  banner.style.borderColor = color;
+  const vText = document.getElementById("verdict-text");
+  vText.textContent = feedback.verdict;
+  vText.style.color = color;
+  document.getElementById("verdict-check").textContent = feedback.verdict === "PASS" ? "✓" : "";
+
+  document.getElementById("diagnosis-text").textContent = feedback.diagnosis || "";
+  const nudge = document.getElementById("nudge-text");
+  nudge.textContent = feedback.nudge || "";
+  nudge.style.display = feedback.nudge ? "block" : "none";
+
+  document.getElementById("their-response-text").textContent = response;
+
+  if (feedback.verdict === "PASS") {
+    roundResults.push({ round: currentRound, attempts: attempts, verdict: "PASS" });
+  }
+
+  const actions = document.getElementById("feedback-actions");
+  actions.innerHTML = "";
+
+  if (feedback.verdict !== "PASS") {
+    const retryBtn = document.createElement("button");
+    retryBtn.className = "retry-btn";
+    retryBtn.textContent = "REVISE & RESUBMIT";
+    retryBtn.onclick = function() {
+      fb.classList.remove("show");
+      document.getElementById("writing-area").style.display = "block";
+      document.getElementById("response-input").disabled = false;
+      document.getElementById("submit-btn").disabled = false;
+      document.getElementById("submit-btn").textContent = "SUBMIT";
+      document.getElementById("hint-box").classList.remove("show");
+      hintVisible = false;
+      document.querySelector(".hint-btn").textContent = "SHOW HINT";
+      document.getElementById("response-input").focus();
+    };
+    actions.appendChild(retryBtn);
+  }
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "next-btn";
+  nextBtn.textContent = feedback.verdict === "PASS"
+    ? (currentRound >= ROUNDS.length - 1 ? "FINISH" : "NEXT ROUND →")
+    : (currentRound >= ROUNDS.length - 1 ? "FINISH ANYWAY" : "SKIP TO NEXT →");
+  nextBtn.onclick = function() {
+    if (currentRound >= ROUNDS.length - 1) showComplete();
+    else { currentRound++; renderRound(); }
+  };
+  actions.appendChild(nextBtn);
+
+  fb.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function showComplete() {
+  document.getElementById("input-area").style.display = "none";
+  document.getElementById("feedback-area").classList.remove("show");
+  document.querySelector(".header").style.display = "none";
+  document.querySelector(".prompt-card").style.display = "none";
+  document.querySelector(".challenge-box").style.display = "none";
+
+  document.getElementById("complete-screen").style.display = "block";
+
+  const passedCount = roundResults.filter(r => r.verdict === "PASS").length;
+  document.getElementById("complete-emoji").textContent =
+    passedCount >= 4 ? "🔥" : passedCount >= 2 ? "💪" : "📝";
+  document.getElementById("complete-score").textContent =
+    passedCount + " / " + ROUNDS.length + " rounds passed";
+
+  const list = document.getElementById("results-list");
+  list.innerHTML = "";
+  ROUNDS.forEach(function(r, i) {
+    const result = roundResults.find(rr => rr.round === i);
+    const row = document.createElement("div");
+    row.className = "result-row";
+    row.innerHTML =
+      '<span class="result-diff">' + r.difficulty + '</span>' +
+      '<span class="result-verdict" style="color:' + (result ? "var(--pass)" : "var(--text-faint)") + '">' +
+      (result ? "PASS (" + result.attempts + " attempt" + (result.attempts > 1 ? "s" : "") + ")" : "—") +
+      '</span>';
+    list.appendChild(row);
+  });
+}
+
+function resetAll() {
+  currentRound = 0;
+  attempts = 0;
+  roundResults = [];
+  document.querySelector(".header").style.display = "";
+  document.querySelector(".prompt-card").style.display = "";
+  document.querySelector(".challenge-box").style.display = "";
+  renderRound();
+}
+
+renderRound();
+</script>
+</body>
+</html>

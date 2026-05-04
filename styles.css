@@ -1,0 +1,358 @@
+/* ============================================
+   AP LANG C.E.R. SUITE — Shared Styles
+   ============================================ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg: #0e0e0e;
+  --card: #161616;
+  --border: #2a2a2a;
+  --text: #e8e4de;
+  --text-dim: #888;
+  --text-faint: #555;
+  --accent: #f59e0b;
+  --accent-dim: #3d3a20;
+  --accent-bg: #1a1a0e;
+  --pass: #22c55e;
+  --warn: #f59e0b;
+  --fail: #ef4444;
+  --mono: 'IBM Plex Mono', 'Courier New', Courier, monospace;
+  --serif: Georgia, 'Times New Roman', serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ===== PASSWORD GATE ===== */
+#gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+#gate h1 {
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  text-align: center;
+}
+#gate .gate-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+}
+#gate .gate-input-wrap {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+}
+#gate input {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  outline: none;
+}
+#gate input:focus { border-color: var(--accent); }
+#gate input::placeholder { color: var(--text-faint); }
+#gate button {
+  background: var(--accent);
+  border: none;
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#gate button:hover { opacity: 0.9; }
+#gate .gate-error {
+  color: var(--fail);
+  font-size: 12px;
+  margin-top: 12px;
+  height: 18px;
+}
+
+/* ===== MAIN APP ===== */
+#app {
+  display: none;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+/* ===== BACK-TO-HOME LINK ===== */
+.home-link {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-faint);
+  text-decoration: none;
+  margin-bottom: 16px;
+  padding: 4px 0;
+}
+.home-link:hover { color: var(--text-dim); }
+
+/* ===== HEADER ===== */
+.header { margin-bottom: 20px; }
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.title-row h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+}
+
+/* ===== PROGRESS PIPS (Gauntlet + Lab) ===== */
+.round-badge {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.round-badge .total {
+  font-size: 16px;
+  color: var(--text-faint);
+}
+.difficulty-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pip {
+  width: 40px;
+  height: 5px;
+  border-radius: 2px;
+  background: #333;
+  transition: background 0.3s;
+}
+.pip.done { background: var(--pass); }
+.pip.active { background: var(--accent); }
+.difficulty-label {
+  margin-left: 10px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ===== TEXTAREA ===== */
+textarea {
+  width: 100%;
+  min-height: 120px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 14px 16px;
+  resize: vertical;
+  outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: var(--text-faint); }
+textarea:disabled { opacity: 0.5; }
+
+/* ===== WORD COUNT ===== */
+.word-count {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+/* ===== BUTTONS ===== */
+.submit-btn {
+  background: var(--accent);
+  border: none;
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 10px 24px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.submit-btn:hover { opacity: 0.9; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.secondary-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.secondary-btn:hover { background: rgba(255,255,255,0.05); }
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid #555;
+  color: #999;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.ghost-btn:hover { border-color: #888; color: #ccc; }
+
+.start-btn {
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.start-btn:hover { background: rgba(255,255,255,0.04); }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* ===== ERROR BOX ===== */
+.error-box {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #1a0e0e;
+  border: 1px solid #3d2020;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--fail);
+  display: none;
+}
+.error-box.show { display: block; }
+
+/* ===== SPINNER ===== */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* ===== VERDICT BANNER (Gauntlet + Lab) ===== */
+.verdict-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: 2px solid;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  background: #111;
+}
+.verdict-text {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+}
+
+/* ===== NUDGE TEXT ===== */
+.nudge-text {
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--accent);
+  font-style: italic;
+  margin-top: 10px;
+}
+
+/* ===== COMPLETE CARD ===== */
+.complete-card {
+  text-align: center;
+  padding: 40px 30px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-top: 40px;
+}
+.complete-card h1 {
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.complete-score {
+  font-size: 16px;
+  color: var(--text-dim);
+}
+.results-list { margin-top: 20px; text-align: left; }
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #222;
+  font-size: 12px;
+}
+.result-diff { color: var(--text-dim); letter-spacing: 1px; }
+.result-verdict { font-weight: 700; letter-spacing: 1px; }
+
+.reset-btn {
+  margin-top: 24px;
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  padding: 12px 28px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.reset-btn:hover { background: rgba(255,255,255,0.04); }
+
+/* ===== MOBILE ===== */
+@media (max-width: 500px) {
+  .title-row h1 { font-size: 14px; letter-spacing: 2px; }
+  .pip { width: 28px; }
+}

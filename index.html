@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP Lang — C.E.R. Practice Suite</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Landing page overrides */
+  #app {
+    max-width: 800px;
+    padding: 40px 20px 80px;
+  }
+
+  .suite-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .suite-header h1 {
+    font-size: 20px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .suite-header .suite-sub {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+  }
+  .suite-header .suite-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 14px;
+    line-height: 1.6;
+    font-family: var(--serif);
+  }
+
+  .activity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .activity-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: pointer;
+  }
+  .activity-card:hover {
+    background: #1c1c1c;
+  }
+  .activity-card.amber { border-top: 3px solid #f59e0b; }
+  .activity-card.amber:hover { border-color: #f59e0b; }
+  .activity-card.red { border-top: 3px solid #e05252; }
+  .activity-card.red:hover { border-color: #e05252; }
+  .activity-card.blue { border-top: 3px solid #52b4e0; }
+  .activity-card.blue:hover { border-color: #52b4e0; }
+  .activity-card.neutral { border-top: 3px solid #555; }
+  .activity-card.neutral:hover { border-color: #888; }
+
+  .card-tag {
+    font-size: 9px;
+    letter-spacing: 3px;
+    font-weight: 700;
+  }
+  .amber .card-tag { color: #f59e0b; }
+  .red .card-tag { color: #e05252; }
+  .blue .card-tag { color: #52b4e0; }
+  .neutral .card-tag { color: #888; }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .card-desc {
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    flex: 1;
+  }
+
+  .card-launch {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+  .amber .card-launch { color: #f59e0b; }
+  .red .card-launch { color: #e05252; }
+  .blue .card-launch { color: #52b4e0; }
+  .neutral .card-launch { color: #888; }
+
+  /* CER badge row for step-builder */
+  .cer-badges {
+    display: flex;
+    gap: 6px;
+  }
+  .cer-badge {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--mono);
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
+  .cer-badge.c { background: rgba(224,82,82,0.15); color: #e05252; }
+  .cer-badge.e { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .cer-badge.r { background: rgba(82,180,224,0.15); color: #52b4e0; }
+
+  .suite-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 30px;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 560px) {
+    .activity-grid { grid-template-columns: 1fr; }
+    .suite-header h1 { font-size: 16px; letter-spacing: 3px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="gate">
+  <h1>C.E.R. PRACTICE SUITE</h1>
+  <div class="gate-sub">AP Language &amp; Composition · Howell High School</div>
+  <div class="gate-input-wrap">
+    <input type="password" id="pw-input" placeholder="Enter password" autocomplete="off" />
+    <button onclick="checkPassword()">ENTER</button>
+  </div>
+  <div class="gate-error" id="pw-error"></div>
+</div>
+
+<!-- MAIN LANDING -->
+<div id="app">
+  <div class="suite-header">
+    <h1>C.E.R. PRACTICE SUITE</h1>
+    <div class="suite-sub">AP LANGUAGE &amp; COMPOSITION · HOWELL HIGH SCHOOL</div>
+    <div class="suite-desc">
+      Three activities built around the 2023 AP Lang Argument prompt — Curbelo on fear-based persuasion.<br>
+      Choose an activity below.
+    </div>
+  </div>
+
+  <div class="activity-grid">
+
+    <!-- Reasoning Gauntlet -->
+    <a class="activity-card amber" href="gauntlet.html">
+      <div class="card-tag">ACTIVITY 1</div>
+      <div class="card-title">THE REASONING GAUNTLET</div>
+      <div class="card-desc">
+        You get the claim and the evidence. Write the "so what?" that connects them.
+        Five rounds, escalating difficulty — the AI diagnoses exactly what went wrong.
+      </div>
+      <div class="card-launch">LAUNCH →</div>
+    </a>
+
+    <!-- Diagnosis Lab -->
+    <a class="activity-card red" href="diagnosis-lab.html">
+      <div class="card-tag">ACTIVITY 2</div>
+      <div class="card-title">THE DIAGNOSIS LAB</div>
+      <div class="card-desc">
+        Read flawed argument paragraphs with intentional C.E.R. errors baked in.
+        Identify the flaw, then rewrite the broken component.
+      </div>
+      <div class="card-launch">LAUNCH →</div>
+    </a>
+
+    <!-- Step-Builder -->
+    <a class="activity-card blue" href="step-builder.html">
+      <div class="card-tag">ACTIVITY 3</div>
+      <div class="card-title">C.E.R. STEP-BUILDER</div>
+      <div class="card-desc">
+        Build a full argument paragraph from scratch — one piece at a time.
+        Each step gets feedback before the next unlocks.
+      </div>
+      <div class="cer-badges">
+        <span class="cer-badge c">C</span>
+        <span class="cer-badge e">E</span>
+        <span class="cer-badge r">R</span>
+      </div>
+      <div class="card-launch">LAUNCH →</div>
+    </a>
+
+    <!-- Cheat Sheet -->
+    <a class="activity-card neutral" href="cheat-sheet.html" target="_blank">
+      <div class="card-tag">REFERENCE</div>
+      <div class="card-title">C.E.R. CHEAT SHEET</div>
+      <div class="card-desc">
+        One-page printable reference covering claim, evidence, reasoning,
+        counterargument, and the sophistication point.
+      </div>
+      <div class="card-launch">OPEN →</div>
+    </a>
+
+  </div>
+
+  <div class="suite-footer">Mr. Parrish &bull; AP Language &amp; Composition</div>
+</div>
+
+<script src="config.js"></script>
+<script>
+function checkPassword() {
+  if (document.getElementById("pw-input").value === PASSWORD) {
+    sessionStorage.setItem("auth", "1");
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  } else {
+    document.getElementById("pw-error").textContent = "Wrong password. Try again.";
+  }
+}
+document.getElementById("pw-input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") checkPassword();
+});
+
+// Skip gate if already authenticated this session
+if (sessionStorage.getItem("auth") === "1") {
+  document.getElementById("gate").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+</script>
+
+</body>
+</html>

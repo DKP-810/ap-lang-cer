@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP Lang Argument Essay — C.E.R. Cheat Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  @page { margin: 0.4in; size: letter; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 10.5pt;
+    line-height: 1.38;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 0.4in;
+    max-width: 8.5in;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    border-bottom: 3px solid #1a1a1a;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 20pt;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  .header .subtitle {
+    font-size: 9pt;
+    font-style: italic;
+    color: #555;
+    margin-top: 2px;
+  }
+
+  /* MAIN GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* CARDS */
+  .card {
+    border: 1.5px solid #1a1a1a;
+    padding: 8px 10px;
+    position: relative;
+  }
+  .card.full-width {
+    grid-column: 1 / -1;
+  }
+  .card h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 13pt;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card h2 .letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: #1a1a1a;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13pt;
+    font-weight: 500;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .card h3 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 1px;
+  }
+  .card p, .card li {
+    font-size: 9.5pt;
+    line-height: 1.35;
+  }
+  .card ul {
+    padding-left: 14px;
+    margin-top: 2px;
+  }
+  .card li {
+    margin-bottom: 1px;
+  }
+  .card .definition {
+    font-style: italic;
+    font-size: 9.5pt;
+    color: #333;
+    margin-bottom: 3px;
+  }
+  .card .warning {
+    background: #f5f0e8;
+    border-left: 3px solid #1a1a1a;
+    padding: 3px 6px;
+    margin-top: 5px;
+    font-size: 8.5pt;
+    line-height: 1.3;
+  }
+  .card .warning strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt;
+  }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* SOPHISTICATION SECTION */
+  .soph {
+    border: 1.5px solid #1a1a1a;
+    background: #f9f7f3;
+    padding: 8px 10px;
+  }
+  .soph h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 11pt;
+    margin-bottom: 3px;
+  }
+  .soph ul {
+    padding-left: 14px;
+    margin-top: 2px;
+  }
+  .soph li {
+    font-size: 9pt;
+    line-height: 1.32;
+    margin-bottom: 1px;
+  }
+
+  /* STRUCTURE QUICK-REF */
+  .structure {
+    border: 1.5px solid #1a1a1a;
+    padding: 8px 10px;
+  }
+  .structure h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 11pt;
+    margin-bottom: 4px;
+  }
+  .structure .step {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 3px;
+    font-size: 9pt;
+    line-height: 1.3;
+  }
+  .structure .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 8.5pt;
+    background: #1a1a1a;
+    color: #fff;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* FOOTER */
+  .footer {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 7.5pt;
+    color: #999;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  @media print {
+    body { padding: 0; }
+    .card, .soph, .structure { break-inside: avoid; }
+    .screen-nav { display: none; }
+  }
+  .screen-nav {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt;
+    margin-bottom: 8px;
+  }
+  .screen-nav a {
+    color: #888;
+    text-decoration: none;
+    letter-spacing: 1px;
+  }
+  .screen-nav a:hover { color: #333; }
+</style>
+</head>
+<body>
+
+<div class="screen-nav"><a href="index.html">← BACK TO SUITE</a></div>
+
+<div class="header">
+  <h1>Argument Essay — C.E.R. Cheat Sheet</h1>
+  <div class="subtitle">AP English Language &amp; Composition &bull; The three moves every argument paragraph must make</div>
+</div>
+
+<div class="grid">
+
+  <!-- CLAIM -->
+  <div class="card">
+    <h2><span class="letter">C</span> Claim</h2>
+    <p class="definition">Your position — the arguable assertion your essay exists to defend.</p>
+
+    <h3>Thesis (Overall Claim)</h3>
+    <ul>
+      <li>A <strong>defensible position</strong> on the prompt — not a fact, not a summary</li>
+      <li>Should be <strong>qualifiable</strong>: "largely," "to a significant extent," "with notable exceptions"</li>
+      <li>Previews your <strong>line of reasoning</strong> — the logical path your body paragraphs will follow</li>
+    </ul>
+
+    <h3>Body Paragraph Claims</h3>
+    <ul>
+      <li>Each paragraph opens with a <strong>sub-claim</strong> that supports the thesis</li>
+      <li>Sub-claims should <strong>build on each other</strong>, not repeat the same idea</li>
+      <li>Together, they form a <strong>line of reasoning</strong> — a logical progression toward your conclusion</li>
+    </ul>
+
+    <div class="warning">
+      <strong>⚠ TRAP:</strong> A thesis that simply restates the prompt or states an obvious fact ("Paine describes America") is not defensible and earns zero thesis points.
+    </div>
+  </div>
+
+  <!-- EVIDENCE -->
+  <div class="card">
+    <h2><span class="letter">E</span> Evidence</h2>
+    <p class="definition">The concrete proof you offer to make your claim believable.</p>
+
+    <h3>Types You Can Use</h3>
+    <ul>
+      <li><strong>Historical:</strong> events, movements, Supreme Court cases, legislation</li>
+      <li><strong>Current Events:</strong> recent examples from news, politics, culture</li>
+      <li><strong>Personal Experience / Observation:</strong> your own life, community, school</li>
+      <li><strong>Literature &amp; Arts:</strong> novels, film, music — used as cultural evidence</li>
+      <li><strong>Data &amp; Studies:</strong> statistics, research, expert testimony</li>
+      <li><strong>Analogies &amp; Hypotheticals:</strong> comparisons that illuminate the point</li>
+    </ul>
+
+    <h3>What Makes Evidence <em>Good</em>?</h3>
+    <ul>
+      <li><strong>Specific</strong> — names, dates, details — not vague gestures</li>
+      <li><strong>Relevant</strong> — directly tied to the sub-claim, not tangential</li>
+      <li><strong>Varied</strong> — multiple types across paragraphs shows range</li>
+    </ul>
+
+    <div class="warning">
+      <strong>⚠ TRAP:</strong> Listing evidence without explaining it = "evidence dumping." The reader doesn't do your thinking for you.
+    </div>
+  </div>
+
+  <!-- REASONING -->
+  <div class="card">
+    <h2><span class="letter">R</span> Reasoning</h2>
+    <p class="definition">The "so what?" — your explanation of <em>why</em> the evidence proves the claim.</p>
+
+    <h3>What Reasoning Does</h3>
+    <ul>
+      <li><strong>Connects</strong> evidence → claim: explains the logical link</li>
+      <li><strong>Interprets</strong> the evidence: tells the reader what to see in it</li>
+      <li><strong>Advances</strong> the argument: pushes the paragraph forward, doesn't just summarize</li>
+    </ul>
+
+    <h3>Test Yourself</h3>
+    <ul>
+      <li>After your evidence, can you answer: <strong>"This matters because…"</strong>?</li>
+      <li>Could someone read your evidence and reach a <em>different</em> conclusion? If yes, you <strong>must</strong> explain your interpretation.</li>
+      <li>Does your reasoning <strong>echo your sub-claim</strong> in new, deeper terms?</li>
+    </ul>
+
+    <div class="warning">
+      <strong>⚠ TRAP:</strong> Restating the evidence in different words is <em>not</em> reasoning. Reasoning adds a new analytical layer.
+    </div>
+  </div>
+
+  <!-- COUNTERARGUMENT -->
+  <div class="card">
+    <h2>Counterargument &amp; Rebuttal</h2>
+    <p class="definition">Acknowledging the other side — then explaining why your position still holds.</p>
+
+    <h3>Two Moves</h3>
+    <ul>
+      <li><strong>Concession:</strong> Acknowledge what the opposition gets right. ("It is true that…" / "Admittedly…")</li>
+      <li><strong>Rebuttal:</strong> Explain why that doesn't undermine your argument. ("However…" / "Yet this overlooks…")</li>
+    </ul>
+
+    <h3>Why It Matters</h3>
+    <ul>
+      <li>Shows you've considered <strong>complexity</strong>, not just one side</li>
+      <li>Often the <strong>fastest path to the sophistication point</strong></li>
+      <li>Strongest when <strong>woven into body paragraphs</strong>, not isolated in a throwaway paragraph</li>
+    </ul>
+
+    <div class="warning">
+      <strong>⚠ TRAP:</strong> A counterargument you never rebut actually <em>weakens</em> your essay. Always answer it.
+    </div>
+  </div>
+
+  <!-- BOTTOM SECTION -->
+  <div class="bottom-bar">
+
+    <!-- SOPHISTICATION -->
+    <div class="soph">
+      <h2>✦ The Sophistication Point</h2>
+      <ul>
+        <li>Situate the argument in a <strong>broader context</strong> (historical, social, cultural)</li>
+        <li>Explore <strong>tension or complexity</strong> within your own position</li>
+        <li>Use <strong>vivid, purposeful</strong> style — not just "fancy" words, but language that serves meaning</li>
+        <li>Develop a <strong>nuanced</strong> thesis (qualified, not absolute)</li>
+        <li>Make an <strong>insightful connection</strong> across evidence or time periods</li>
+      </ul>
+    </div>
+
+    <!-- STRUCTURE -->
+    <div class="structure">
+      <h2>Essay at a Glance</h2>
+      <div class="step"><span class="step-num">1</span><span><strong>Intro:</strong> Context → Thesis with defensible claim + line of reasoning</span></div>
+      <div class="step"><span class="step-num">2</span><span><strong>Body ¶1:</strong> Sub-claim → Evidence → Reasoning (your strongest, most intuitive point)</span></div>
+      <div class="step"><span class="step-num">3</span><span><strong>Body ¶2:</strong> Sub-claim → Evidence → Reasoning (builds complexity, deepens the argument)</span></div>
+      <div class="step"><span class="step-num">4</span><span><strong>Body ¶3:</strong> Counterargument + Rebuttal, OR a third sub-claim that adds nuance</span></div>
+      <div class="step"><span class="step-num">5</span><span><strong>Conclusion:</strong> Extend — don't repeat. Connect to a bigger idea or implication.</span></div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Mr. Parrish &bull; AP Language &amp; Composition &bull; Howell High School
+  </div>
+
+</div>
+
+</body>
+</html>

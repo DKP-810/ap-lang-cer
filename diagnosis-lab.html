@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Diagnosis Lab</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Lab accent: red */
+  :root {
+    --accent: #e05252;
+    --accent-dim: #3d2020;
+    --accent-bg: #1a0e0e;
+    --accent-secondary: #52b4e0;
+    --accent-secondary-dim: #1a2a3a;
+  }
+
+  #app { max-width: 740px; }
+  #gate button { color: #fff; }
+  .submit-btn { color: #fff; }
+
+  /* Specimen Card */
+  .specimen-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .specimen-header {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .specimen-tag {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .specimen-context {
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+  }
+  .specimen-body { padding: 20px; }
+  .specimen-text {
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.75;
+    color: #d4d0c8;
+  }
+
+  /* Challenge Box */
+  .challenge-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #c8b8b8;
+    line-height: 1.5;
+  }
+  .challenge-box strong { color: var(--text); }
+
+  /* Phases */
+  .phase { display: none; }
+  .phase.active { display: block; }
+
+  /* Step Labels */
+  .step-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .step-label-secondary {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent-secondary);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  /* Flaw Selection */
+  .flaw-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .flaw-option {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .flaw-option:hover { border-color: var(--text-dim); }
+  .flaw-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+  .flaw-option-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .flaw-option-desc {
+    font-family: var(--serif);
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-dim);
+  }
+
+  .word-count { margin-top: 6px; }
+
+  /* Rewrite instruction */
+  .rewrite-instruction {
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  /* Feedback sections */
+  .feedback-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .feedback-section-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+  }
+  .feedback-text {
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.6;
+    color: #d4d0c8;
+  }
+
+  .secondary-btn:hover { background: rgba(224,82,82,0.08); }
+  .reset-btn:hover { background: rgba(224,82,82,0.08); }
+
+  /* Diagnosis immediate result */
+  .diagnose-result {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+  .diagnose-result-text {
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: #d4d0c8;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 500px) {
+    .flaw-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <a href="index.html" class="home-link">← HOME</a>
+
+  <div class="header">
+    <div class="title-row">
+      <h1>THE DIAGNOSIS LAB</h1>
+      <div class="round-badge"><span id="round-num">1</span><span class="total">/5</span></div>
+    </div>
+    <div class="difficulty-bar" id="difficulty-bar">
+      <div class="pip" id="pip-0"></div>
+      <div class="pip" id="pip-1"></div>
+      <div class="pip" id="pip-2"></div>
+      <div class="pip" id="pip-3"></div>
+      <div class="pip" id="pip-4"></div>
+      <span class="difficulty-label" id="difficulty-label"></span>
+    </div>
+  </div>
+
+  <!-- Specimen -->
+  <div class="specimen-card">
+    <div class="specimen-header">
+      <span class="specimen-tag">SPECIMEN</span>
+      <span class="specimen-context" id="specimen-context"></span>
+    </div>
+    <div class="specimen-body">
+      <div class="specimen-text" id="specimen-text"></div>
+    </div>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box" id="challenge-box">
+    <span>🔬</span>
+    <span id="challenge-text"></span>
+  </div>
+
+  <!-- Phase: Start -->
+  <div class="phase active" id="phase-start">
+    <button class="start-btn" id="start-btn" onclick="startRound()">EXAMINE SPECIMEN 1</button>
+  </div>
+
+  <!-- Phase: Diagnose -->
+  <div class="phase" id="phase-diagnose">
+    <div class="step-label">STEP 1 — DIAGNOSE THE FLAW</div>
+    <div class="flaw-options" id="flaw-options"></div>
+    <div class="btn-row">
+      <button class="submit-btn" id="diagnose-btn" onclick="submitDiagnosis()" disabled>LOCK IN DIAGNOSIS</button>
+    </div>
+    <div class="error-box" id="error-diagnose"></div>
+    <div class="diagnose-result" id="diagnose-result" style="display:none;"></div>
+  </div>
+
+  <!-- Phase: Rewrite -->
+  <div class="phase" id="phase-rewrite">
+    <div class="step-label-secondary">STEP 2 — REWRITE THE BROKEN COMPONENT</div>
+    <div class="rewrite-instruction" id="rewrite-instruction"></div>
+    <textarea id="rewrite-input" placeholder="Your rewritten version goes here..."></textarea>
+    <div class="word-count" id="rewrite-word-count">0 words</div>
+    <div class="btn-row">
+      <button class="submit-btn" id="rewrite-btn" onclick="submitRewrite()">SUBMIT REWRITE</button>
+    </div>
+    <div class="error-box" id="error-rewrite"></div>
+  </div>
+
+  <!-- Phase: Feedback -->
+  <div class="phase" id="phase-feedback">
+    <div class="verdict-banner" id="verdict-banner">
+      <span class="verdict-text" id="verdict-text"></span>
+      <span id="verdict-check"></span>
+    </div>
+
+    <div class="feedback-section">
+      <div class="feedback-section-label">YOUR DIAGNOSIS</div>
+      <div class="feedback-text" id="fb-diagnosis"></div>
+    </div>
+
+    <div class="feedback-section">
+      <div class="feedback-section-label">COACH'S ANALYSIS</div>
+      <div class="feedback-text" id="fb-analysis"></div>
+      <div class="nudge-text" id="fb-nudge"></div>
+    </div>
+
+    <div class="feedback-section" style="background:#111;border-color:#222;">
+      <div class="feedback-section-label">YOUR REWRITE</div>
+      <div class="feedback-text" id="fb-rewrite" style="color:var(--text-dim);font-style:italic;"></div>
+    </div>
+
+    <div class="btn-row" id="feedback-actions"></div>
+  </div>
+
+  <!-- Complete -->
+  <div id="complete-screen" style="display:none;">
+    <div class="complete-card">
+      <div id="complete-emoji" style="font-size:40px;margin-bottom:12px;"></div>
+      <h1>LAB COMPLETE</h1>
+      <div class="complete-score" id="complete-score"></div>
+      <div class="results-list" id="results-list"></div>
+      <button class="reset-btn" onclick="resetAll()">RUN IT AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+if (sessionStorage.getItem("auth") !== "1") { window.location.href = "index.html"; }
+document.getElementById("app").style.display = "block";
+
+const FLAW_TYPES = [
+  { id: "weak-claim", name: "Weak Claim", desc: "The claim is vague, obvious, or not actually arguable" },
+  { id: "evidence-dump", name: "Evidence Dump", desc: "Evidence is listed but never explained or connected" },
+  { id: "parrot-reasoning", name: "Parrot Reasoning", desc: "The reasoning just restates the evidence in different words" },
+  { id: "drifter-reasoning", name: "Drifter Reasoning", desc: "The reasoning wanders off-topic from the claim" },
+  { id: "no-rebuttal", name: "Unfinished Counter", desc: "A counterargument is raised but never answered" },
+  { id: "missing-reasoning", name: "Missing Reasoning", desc: "There's a claim and evidence but no reasoning at all" }
+];
+
+const ROUNDS = [
+  {
+    difficulty: "WARM-UP",
+    context: "Missing a critical piece",
+    flaw: "missing-reasoning",
+    flawLabel: "Missing Reasoning",
+    brokenComponent: "reasoning",
+    paragraph: "Curbelo's claim that fear-based persuasion is not always effective is supported by real-world evidence. The D.A.R.E. program, launched in 1983 and implemented in schools nationwide, used vivid fear-based messaging about drug consequences — showing students graphic images and worst-case outcomes. A 1994 study commissioned by the U.S. Department of Justice found that D.A.R.E. graduates showed no statistically significant reduction in drug use compared to students who never participated in the program.",
+    challenge: "This paragraph has a <strong>claim</strong> and <strong>evidence</strong>, but something critical is missing. Find the gap, then fill it.",
+    rewritePrompt: "Write the reasoning that should follow this evidence. Connect the D.A.R.E. data back to Curbelo's claim — what does this evidence actually prove about why fear-based persuasion fails?"
+  },
+  {
+    difficulty: "STANDARD",
+    context: "Something sounds familiar",
+    flaw: "parrot-reasoning",
+    flawLabel: "Parrot Reasoning",
+    brokenComponent: "reasoning",
+    paragraph: "Curbelo's assertion that trying to scare people can sow resentment is supported by research on political advertising. A 2010 study from Vanderbilt University found that negative political ads using fear-based framing increased viewer cynicism toward both the attacking candidate and their target, reduced civic engagement, and made voters less likely to participate in local elections. In other words, when political ads rely on fear and negativity, voters become more cynical about both candidates and less willing to vote, demonstrating that fear-based political messaging creates problems for civic participation.",
+    challenge: "The claim is solid. The evidence is strong. But read the last sentence carefully — is the <strong>reasoning</strong> actually doing its job?",
+    rewritePrompt: "Rewrite the reasoning (the last sentence). Don't just restate what the study already told us — explain WHY increased cynicism and lower turnout specifically validates Curbelo's warning about fear 'sowing resentment.'"
+  },
+  {
+    difficulty: "ELEVATED",
+    context: "Check the argument's foundation",
+    flaw: "weak-claim",
+    flawLabel: "Weak Claim",
+    brokenComponent: "claim",
+    paragraph: "Fear has been used in persuasion for a long time. During the 1962 Cuban Missile Crisis, President Kennedy's televised address used precisely calibrated fear — naming Soviet missile sites, estimating their range, and describing the direct threat to American cities — alongside a concrete proposed response. Polls showed public support for firm action jumped from 44% to over 80% within days. This evidence suggests that fear's effectiveness depends on specificity and credibility: a vague fear generates the paralysis and resentment Curbelo warns about, but a precisely named threat paired with a clear path to action can channel fear into mobilization — making Curbelo's claim more nuanced than it first appears.",
+    challenge: "The evidence is excellent and the reasoning is sharp. So where's the problem? Look at <strong>where the paragraph starts</strong>.",
+    rewritePrompt: "Rewrite the opening claim (first sentence only). It needs to be a defensible, arguable assertion that directly engages Curbelo's claim and that the evidence and reasoning actually support — not a vague historical observation."
+  },
+  {
+    difficulty: "ADVANCED",
+    context: "The argument gives ground it never takes back",
+    flaw: "no-rebuttal",
+    flawLabel: "Unfinished Counter",
+    brokenComponent: "rebuttal",
+    paragraph: "Curbelo's claim gains force from what rhetorical theorists call the 'boomerang effect' — the documented tendency of high-threat messaging to backfire when audiences feel targeted or attacked. Research on HIV/AIDS prevention campaigns in the 1980s found that graphic fear-based messaging in already-stigmatized communities drove people away from testing rather than toward it, because audiences associated the fear with the messenger rather than the disease — exactly the resentment Curbelo describes. Admittedly, not all fear appeals produce this effect: Kennedy's Cuban Missile Crisis address, anti-tobacco graphic warning labels, and post-9/11 military recruitment campaigns all used fear successfully to shift public behavior at significant scale, suggesting that context and credibility matter enormously in whether fear persuades or alienates.",
+    challenge: "This paragraph makes a strong case, then introduces a <strong>counterargument</strong>. But read to the end — does it finish the job?",
+    rewritePrompt: "Write the rebuttal — the 1-2 sentences that should follow the counterargument. Acknowledge what those examples get right, then explain why Curbelo's core warning still holds — or explain what condition separates the successful fear appeals from the resentment-producing ones."
+  },
+  {
+    difficulty: "BOSS ROUND",
+    context: "Multiple issues — find the primary one",
+    flaw: "evidence-dump",
+    flawLabel: "Evidence Dump",
+    brokenComponent: "reasoning",
+    paragraph: "Curbelo's claim that fear-based persuasion sows resentment is too absolute to apply universally. Anti-smoking campaigns using graphic images of diseased lungs on cigarette packaging reduced smoking rates in multiple countries after implementation. Fear-based messaging following the September 11 attacks drove record U.S. military enlistment in 2001 and 2002. The Scared Straight program used fear to deter juvenile crime but multiple studies found it actually increased recidivism among participants. Environmental campaigns using apocalyptic climate imagery have been linked in research to feelings of helplessness rather than action. Early mammography campaigns by the American Cancer Society used fear of cancer to successfully increase screening rates among women in the 1980s.",
+    challenge: "There's a lot of evidence in here. <em>Too much</em>, actually. Find the <strong>primary flaw</strong>, then fix the paragraph by choosing the strongest 1-2 examples and writing the reasoning that connects them to the claim.",
+    rewritePrompt: "Pick the 1-2 strongest pieces of evidence from the list and write them with proper reasoning that connects to the claim. Show specifically how your chosen examples demonstrate that Curbelo's claim is 'too absolute' — don't just list more history."
+  }
+];
+
+const SYSTEM_PROMPT = `You are an AP Language and Composition writing coach evaluating a student's ability to DIAGNOSE and FIX flawed argument paragraphs.
+
+You will receive:
+- The ORIGINAL flawed paragraph the student examined
+- The ACTUAL FLAW (what was intentionally wrong)
+- The student's DIAGNOSIS (which flaw type they selected)
+- The student's REWRITE (their attempt to fix the broken component)
+
+EVALUATE TWO THINGS:
+
+1. DIAGNOSIS ACCURACY: Did the student correctly identify the flaw?
+2. REWRITE QUALITY: Does their rewrite actually fix the problem? Does it demonstrate the skill that was missing?
+
+RESPOND ONLY with a JSON object in this exact format, with no other text:
+{"verdict": "PASS or PUSH HARDER or TRY AGAIN", "diagnosis_correct": true or false, "analysis": "2-3 sentences evaluating both their diagnosis and their rewrite. Be specific about what works and what doesn't. If their diagnosis was wrong, explain what the actual flaw was and why. If their rewrite falls into the same trap as the original, call it out. Be conversational and direct.", "nudge": "1 sentence — concrete next step if they need to improve, or what made their fix work if they passed."}
+
+CALIBRATION:
+- PASS = Correct diagnosis AND the rewrite genuinely fixes the flaw with real analytical quality
+- PUSH HARDER = Correct diagnosis but the rewrite is weak, OR wrong diagnosis but a decent rewrite that shows understanding
+- TRY AGAIN = Wrong diagnosis AND weak rewrite, or the rewrite repeats the same flaw
+
+Be tough but fair. Keep all feedback to 3 sentences max. Talk like a coach, not a rubric.`;
+
+let currentRound = 0;
+let selectedFlaw = null;
+let roundResults = [];
+
+function renderRound() {
+  const round = ROUNDS[currentRound];
+  document.getElementById("round-num").textContent = currentRound + 1;
+  document.getElementById("difficulty-label").textContent = round.difficulty;
+  document.getElementById("specimen-context").textContent = round.context;
+  document.getElementById("specimen-text").textContent = round.paragraph;
+  document.getElementById("challenge-text").innerHTML = round.challenge;
+  document.getElementById("start-btn").textContent = "EXAMINE SPECIMEN " + (currentRound + 1);
+
+  for (let i = 0; i < 5; i++) {
+    const pip = document.getElementById("pip-" + i);
+    pip.className = "pip";
+    if (i < currentRound) pip.classList.add("done");
+    else if (i === currentRound) pip.classList.add("active");
+    pip.style.opacity = i <= currentRound ? "1" : "0.4";
+  }
+
+  showPhase("phase-start");
+  document.getElementById("complete-screen").style.display = "none";
+  document.getElementById("rewrite-input").value = "";
+  document.getElementById("rewrite-input").disabled = false;
+  document.getElementById("rewrite-btn").disabled = false;
+  document.getElementById("rewrite-btn").textContent = "SUBMIT REWRITE";
+  document.getElementById("rewrite-word-count").textContent = "0 words";
+  document.getElementById("diagnose-btn").disabled = true;
+  document.getElementById("error-diagnose").classList.remove("show");
+  document.getElementById("error-rewrite").classList.remove("show");
+  document.getElementById("diagnose-result").style.display = "none";
+  document.getElementById("diagnose-result").innerHTML = "";
+  selectedFlaw = null;
+
+  document.querySelector(".header").style.display = "";
+  document.querySelector(".specimen-card").style.display = "";
+  document.getElementById("challenge-box").style.display = "";
+}
+
+function showPhase(id) {
+  document.querySelectorAll(".phase").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function startRound() {
+  const container = document.getElementById("flaw-options");
+  container.innerHTML = "";
+  const shuffled = [...FLAW_TYPES].sort(() => Math.random() - 0.5);
+  shuffled.forEach(flaw => {
+    const el = document.createElement("div");
+    el.className = "flaw-option";
+    el.dataset.id = flaw.id;
+    el.innerHTML = `<div class="flaw-option-name">${flaw.name}</div><div class="flaw-option-desc">${flaw.desc}</div>`;
+    el.onclick = function() {
+      document.querySelectorAll(".flaw-option").forEach(o => o.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedFlaw = flaw.id;
+      document.getElementById("diagnose-btn").disabled = false;
+    };
+    container.appendChild(el);
+  });
+  showPhase("phase-diagnose");
+}
+
+function submitDiagnosis() {
+  if (!selectedFlaw) return;
+  const round = ROUNDS[currentRound];
+  const correct = selectedFlaw === round.flaw;
+  const selectedFlawName = FLAW_TYPES.find(f => f.id === selectedFlaw).name;
+
+  // Lock the selection and button
+  document.getElementById("diagnose-btn").disabled = true;
+  document.querySelectorAll(".flaw-option").forEach(o => o.style.pointerEvents = "none");
+
+  // Show immediate correct/wrong feedback
+  const resultDiv = document.getElementById("diagnose-result");
+  resultDiv.innerHTML =
+    '<div class="diagnose-result-text">' +
+    (correct
+      ? `<span style="color:var(--pass);font-weight:700;">✓ CORRECT</span> — That's ${round.flawLabel}. Now fix it.`
+      : `<span style="color:var(--fail);font-weight:700;">✗ INCORRECT</span> — You picked <strong>${selectedFlawName}</strong>, but the flaw was <strong>${round.flawLabel}</strong>. Keep that in mind for the rewrite.`) +
+    '</div>' +
+    '<div class="btn-row">' +
+    (!correct ? '<button class="secondary-btn" onclick="retryDiagnosis()">TRY AGAIN</button>' : '') +
+    '<button class="ghost-btn" onclick="advanceToRewrite()">PROCEED TO REWRITE →</button>' +
+    '</div>';
+  resultDiv.style.display = "block";
+  resultDiv.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function retryDiagnosis() {
+  selectedFlaw = null;
+  document.getElementById("diagnose-result").style.display = "none";
+  document.getElementById("diagnose-result").innerHTML = "";
+  document.getElementById("diagnose-btn").disabled = true;
+  document.querySelectorAll(".flaw-option").forEach(o => {
+    o.style.pointerEvents = "";
+    o.classList.remove("selected");
+  });
+}
+
+function advanceToRewrite() {
+  document.getElementById("rewrite-instruction").textContent = ROUNDS[currentRound].rewritePrompt;
+  showPhase("phase-rewrite");
+  document.getElementById("rewrite-input").focus();
+}
+
+document.getElementById("rewrite-input").addEventListener("input", function() {
+  const words = this.value.trim() ? this.value.trim().split(/\s+/).length : 0;
+  document.getElementById("rewrite-word-count").textContent = words + " words";
+});
+
+async function submitRewrite() {
+  const rewrite = document.getElementById("rewrite-input").value.trim();
+  const errorBox = document.getElementById("error-rewrite");
+
+  if (!rewrite || rewrite.split(/\s+/).length < 10) {
+    errorBox.textContent = "Give me at least a couple sentences to evaluate.";
+    errorBox.classList.add("show");
+    return;
+  }
+
+  errorBox.classList.remove("show");
+  const btn = document.getElementById("rewrite-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>ANALYZING...';
+  document.getElementById("rewrite-input").disabled = true;
+
+  const round = ROUNDS[currentRound];
+  const selectedFlawName = FLAW_TYPES.find(f => f.id === selectedFlaw)?.name || selectedFlaw;
+
+  const userMessage = `ROUND: ${round.difficulty}
+
+ORIGINAL FLAWED PARAGRAPH:
+${round.paragraph}
+
+ACTUAL FLAW: ${round.flawLabel} (the ${round.brokenComponent} was intentionally broken)
+
+STUDENT'S DIAGNOSIS: ${selectedFlawName} (${selectedFlaw === round.flaw ? "CORRECT" : "INCORRECT — they picked the wrong flaw"})
+
+STUDENT'S REWRITE OF THE ${round.brokenComponent.toUpperCase()}:
+${rewrite}`;
+
+  try {
+    const parsed = await callGemini(SYSTEM_PROMPT, userMessage);
+    showFeedback(parsed, rewrite);
+  } catch (err) {
+    errorBox.textContent = "Connection issue — " + (err.message || "try again.");
+    errorBox.classList.add("show");
+    btn.disabled = false;
+    btn.textContent = "SUBMIT REWRITE";
+    document.getElementById("rewrite-input").disabled = false;
+  }
+}
+
+function showFeedback(feedback, rewrite) {
+  const round = ROUNDS[currentRound];
+  const selectedFlawName = FLAW_TYPES.find(f => f.id === selectedFlaw)?.name || selectedFlaw;
+
+  const color = feedback.verdict === "PASS" ? "var(--pass)" :
+                feedback.verdict === "PUSH HARDER" ? "var(--warn)" : "var(--fail)";
+  document.getElementById("verdict-banner").style.borderColor = color;
+  const vt = document.getElementById("verdict-text");
+  vt.textContent = feedback.verdict;
+  vt.style.color = color;
+  document.getElementById("verdict-check").textContent = feedback.verdict === "PASS" ? "✓" : "";
+
+  const diagCorrect = feedback.diagnosis_correct || (selectedFlaw === round.flaw);
+  document.getElementById("fb-diagnosis").innerHTML =
+    `You identified: <strong>${selectedFlawName}</strong> ` +
+    (diagCorrect
+      ? `<span style="color:var(--pass)">✓ CORRECT</span>`
+      : `<span style="color:var(--fail)">✗ INCORRECT</span> — Actual flaw: <strong>${round.flawLabel}</strong>`);
+
+  document.getElementById("fb-analysis").textContent = feedback.analysis || "";
+  const nudge = document.getElementById("fb-nudge");
+  nudge.textContent = feedback.nudge || "";
+  nudge.style.display = feedback.nudge ? "block" : "none";
+
+  document.getElementById("fb-rewrite").textContent = rewrite;
+
+  if (feedback.verdict === "PASS") {
+    roundResults.push({ round: currentRound, verdict: "PASS", diagCorrect: true });
+  }
+
+  const actions = document.getElementById("feedback-actions");
+  actions.innerHTML = "";
+
+  if (feedback.verdict !== "PASS") {
+    const retryBtn = document.createElement("button");
+    retryBtn.className = "secondary-btn";
+    retryBtn.textContent = "REVISE & RESUBMIT";
+    retryBtn.onclick = function() {
+      showPhase("phase-rewrite");
+      document.getElementById("rewrite-input").disabled = false;
+      document.getElementById("rewrite-btn").disabled = false;
+      document.getElementById("rewrite-btn").textContent = "SUBMIT REWRITE";
+      document.getElementById("rewrite-input").focus();
+    };
+    actions.appendChild(retryBtn);
+  }
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "ghost-btn";
+  nextBtn.textContent = feedback.verdict === "PASS"
+    ? (currentRound >= ROUNDS.length - 1 ? "FINISH" : "NEXT SPECIMEN →")
+    : (currentRound >= ROUNDS.length - 1 ? "FINISH ANYWAY" : "SKIP TO NEXT →");
+  nextBtn.onclick = function() {
+    if (currentRound >= ROUNDS.length - 1) showComplete();
+    else { currentRound++; renderRound(); }
+  };
+  actions.appendChild(nextBtn);
+
+  showPhase("phase-feedback");
+}
+
+function showComplete() {
+  document.querySelector(".header").style.display = "none";
+  document.querySelector(".specimen-card").style.display = "none";
+  document.getElementById("challenge-box").style.display = "none";
+  document.querySelectorAll(".phase").forEach(p => p.classList.remove("active"));
+
+  const screen = document.getElementById("complete-screen");
+  screen.style.display = "block";
+
+  const passedCount = roundResults.filter(r => r.verdict === "PASS").length;
+  document.getElementById("complete-emoji").textContent =
+    passedCount >= 4 ? "🔬" : passedCount >= 2 ? "🧪" : "📋";
+  document.getElementById("complete-score").textContent =
+    passedCount + " / " + ROUNDS.length + " specimens diagnosed";
+
+  const list = document.getElementById("results-list");
+  list.innerHTML = "";
+  ROUNDS.forEach(function(r, i) {
+    const result = roundResults.find(rr => rr.round === i);
+    const row = document.createElement("div");
+    row.className = "result-row";
+    row.innerHTML =
+      '<span class="result-diff">' + r.difficulty + ' — ' + r.flawLabel + '</span>' +
+      '<span class="result-verdict" style="color:' + (result ? "var(--pass)" : "var(--text-faint)") + '">' +
+      (result ? "PASS" : "—") + '</span>';
+    list.appendChild(row);
+  });
+}
+
+function resetAll() {
+  currentRound = 0;
+  selectedFlaw = null;
+  roundResults = [];
+  renderRound();
+}
+
+renderRound();
+</script>
+</body>
+</html>
