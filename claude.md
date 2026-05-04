@@ -87,8 +87,8 @@ The three `*_standalone.html` files are the original single-file versions. Still
 ### 1. Gemini 2.0 Flash is DEPRECATED (404 errors)
 - **Symptom:** API returns 404 or misleading "API key not valid" error
 - **Cause:** `gemini-2.0-flash` was deprecated February 2026, shut down March 2026
-- **Fix:** Use `gemini-2.5-flash` (current stable free-tier model as of May 2026)
-- **Future-proofing:** Google deprecates models aggressively. If this breaks again, check https://ai.google.dev/gemini-api/docs/models for current model strings. `gemini-2.5-flash-lite` is a fallback option with higher free-tier rate limits (15 RPM / 1,000 RPD vs Flash's 10 RPM / 250 RPD).
+- **Fix:** Use `gemini-2.5-flash-lite` (switched May 2026 — Flash's free tier hard cap is only 20 RPD per project, which is unusable for a class)
+- **Future-proofing:** Google deprecates models aggressively. If this breaks again, check https://ai.google.dev/gemini-api/docs/models for current model strings.
 
 ### 2. API Key Must Use Header Auth, NOT URL Parameter
 - **Symptom:** "API key not valid. Please pass a valid API key." even with a valid key
@@ -155,8 +155,8 @@ The three `*_standalone.html` files are the original single-file versions. Still
 - **Standalone HTML (Netlify):** Uses Gemini free tier. Each student accesses independently via URL. Best for individual practice.
 
 ### Gemini Free Tier Limits (as of May 2026, post-December 2025 quota cuts)
-- `gemini-2.5-flash`: 10 RPM, 250 RPD
-- `gemini-2.5-flash-lite`: 15 RPM, 1,000 RPD (lighter model, higher limits)
+- `gemini-2.5-flash`: **20 RPD hard cap** per project (confirmed in Cloud Console) — unusable for a class
+- `gemini-2.5-flash-lite`: higher RPD limit — **currently in use**
 - Rate limits are per Google Cloud **project**, not per key
 - Daily quotas reset at midnight Pacific Time
 - A class of 30 students running 5 rounds each = ~150 requests, well within daily limits (but be mindful of the RPM cap during simultaneous use)

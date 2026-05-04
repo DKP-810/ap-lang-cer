@@ -1,6 +1,6 @@
 async function callGemini(systemPrompt, userMessage) {
   const cleanKey = GEMINI_API_KEY.trim();
-  const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent";
 
   const res = await fetch(apiUrl, {
     method: "POST",
