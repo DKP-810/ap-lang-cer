@@ -1,2 +1,2 @@
-const GEMINI_API_KEY = "AIzaSyDqMlkRU_4F6l_-TCY9WGiGFnyquCjq0uY";
+const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
 const PASSWORD = "APLangRulez";
