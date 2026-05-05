@@ -9,7 +9,7 @@ This project contains three LLM-powered practice tools for AP Language and Compo
 2. **The Diagnosis Lab** — Students read flawed argument paragraphs, identify the flaw type from a list, then rewrite the broken component. LLM evaluates both the diagnosis and the fix. Five specimens, escalating difficulty.
 3. **The C.E.R. Step-Builder** — Students write a full argument paragraph from scratch, one piece at a time (claim → evidence → reasoning). Each stage gets LLM feedback before unlocking the next. Final screen shows the assembled paragraph with color-coded C.E.R. components.
 
-All content is thematically tied to the **2011 AP Lang Argument prompt** (Thomas Paine's *Rights of Man* — the passage about American unity despite diversity). The prompt PDF: `2011_AP_Argument_Essay_Prompt.pdf`.
+All content is thematically tied to the **2023 AP Lang Argument prompt** — Carlos Curbelo's 2018 statement on fear-based persuasion.
 
 ---
 
@@ -57,9 +57,7 @@ The Actions workflow triggers automatically. Watch progress at https://github.co
 - **Password:** `APLangRulez` (stored in `config.js`)
 - **Key in source:** Always the placeholder `YOUR_GEMINI_API_KEY_HERE` — never the real key
 - **GitHub secret scanning:** Will flag any real key committed to the repo and revoke it. The workflow approach prevents this entirely.
-- **Referrer restriction gotcha:** Must allow `https://dkp-810.github.io/*` (root domain wildcard), not just `/ap-lang-cer/*`. Browsers send the root origin as the referer header. See Bug #8.
-
----
+- **Referrer restriction gotcha:** Must allow `https://dkp-810.github.io/*` (root domain wildcard), not just `/ap-lang-cer/*`. Browsers send the root origin as the referer header. See Bug #5.
 
 ---
 
@@ -144,11 +142,11 @@ The system prompt (stored in the `SYSTEM_PROMPT` constant) is calibrated to:
 For AP Lang/Psych student feedback: keep commentary very brief, conversational, direct — no formal language. Get to the core issue fast. The LLM prompt is calibrated to match this.
 
 ### The Five Rounds (Escalating Difficulty)
-1. **WARM-UP:** Political polarization data → Paine's ideal. Straightforward connection.
-2. **STANDARD:** Income inequality + declining mobility → "the poor are not oppressed." Two data points that work together.
-3. **ELEVATED:** Peaceful power transfers + Jan 6th. Built-in tension requiring engagement with both sides.
-4. **ADVANCED:** Immigrant cities' economic growth + residential segregation. Qualified claim requiring nuanced reasoning.
-5. **BOSS ROUND:** Constitution + Three-Fifths Compromise → unresolved founding tension. Requires tracing through-lines across time.
+1. **WARM-UP:** D.A.R.E. program failure data → Curbelo's claim. Straightforward connection.
+2. **STANDARD:** Climate fear imagery study → disengagement + conservative resentment. Two effects that together validate Curbelo's warning.
+3. **ELEVATED:** Kennedy's Cuban Missile Crisis address + "nothing to fear" framing. Built-in tension — fear working vs. fear managed.
+4. **ADVANCED:** HIV/AIDS fear campaigns driving stigmatized communities away from care. Condition-specific failure requiring nuanced reasoning.
+5. **BOSS ROUND:** Civil Rights movement's dual persuasion strategy (fear for white Northern moderates, solidarity for Black communities). Requires interrogating Curbelo's buried assumption about persuader choice.
 
 ---
 
@@ -160,7 +158,6 @@ For AP Lang/Psych student feedback: keep commentary very brief, conversational, 
 - **Failure mode labels:** "The Parrot" (restates evidence), "The Echo" (restates claim), "The Drifter" (tangent), "The Generalizer" (vague), "The Summarizer" (no interpretation)
 - **Three verdicts:** PASS, PUSH HARDER, TRY AGAIN
 - Students can revise and resubmit or skip to next round
-- Has a JSX artifact version for whole-class demos in Claude.ai
 
 ### The Diagnosis Lab
 - **Accent color:** Red (#e05252)
@@ -177,21 +174,18 @@ For AP Lang/Psych student feedback: keep commentary very brief, conversational, 
 - **Locked sections** show previously approved work as context for the next step
 - **Final screen** assembles the full paragraph with color-coded underlines marking each C.E.R. component
 - Students can skip forward even without a PASS (but skipping is visually distinguished from passing)
-- Includes collapsible Paine passage for reference
+- Includes collapsible Curbelo quote for reference
 - Each step has its own tailored system prompt with step-appropriate evaluation criteria
 
 ---
 
 ## Next Steps
 
-The refactor from standalone HTML files to a multi-page GitHub Pages site is complete. Remaining items:
-
-1. **Fix Bug #9** (Step-Builder double-click) — hide or disable the submit button while feedback is visible
-2. **Add the Reasoning Gauntlet** to the refactored multi-page structure (`gauntlet.html`) — currently only the Claude.ai JSX version exists in the refactored codebase
-3. **Consider a serverless proxy** (Netlify Functions) if the key ever needs to be truly hidden from View Source — low priority given domain restrictions already in place
+1. **Fix Bug #6** (Step-Builder double-click) — hide or disable the submit button while feedback is visible
+2. **Consider a serverless proxy** (Netlify Functions) if the key ever needs to be truly hidden from View Source — low priority given domain restrictions already in place
 
 ### Recurring Bug Pattern: Button/Input State Management
-Three of the seven bugs (#3, #6, #7) stem from the same root issue: submit buttons and textareas get `disabled = true` during API calls but aren't consistently re-enabled or hidden across all code paths (success, failure, retry, advance). **When refactoring, centralize UI state management** — a single `setPhaseState(phase)` function that handles which elements are visible, enabled, and focused for each phase would eliminate this entire class of bugs.
+Bugs #3, #4, and #6 all stem from the same root issue: submit buttons and textareas get `disabled = true` during API calls but aren't consistently re-enabled or hidden across all code paths (success, failure, retry, advance). **When refactoring, centralize UI state management** — a single `setPhaseState(phase)` function that handles which elements are visible, enabled, and focused for each phase would eliminate this entire class of bugs.
 
 ---
 
