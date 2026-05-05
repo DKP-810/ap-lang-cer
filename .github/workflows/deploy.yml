@@ -29,8 +29,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           sed -i "s/YOUR_GEMINI_API_KEY_HERE/${GEMINI_API_KEY}/g" config.js
-          sed -i "s/YOUR_GEMINI_API_KEY_HERE/${GEMINI_API_KEY}/g" diagnosis_lab_standalone.html
-          sed -i "s/YOUR_GEMINI_API_KEY_HERE/${GEMINI_API_KEY}/g" step_builder_standalone.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
