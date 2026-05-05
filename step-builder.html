@@ -263,6 +263,9 @@
       <span>📋</span>
       <span><strong>STEP 2 — EVIDENCE:</strong> Provide specific, concrete evidence that supports your claim. Names, dates, events, data — not vague gestures. You can use historical examples, current events, personal experience, or data.</span>
     </div>
+    <div id="evidence-revised-note" style="display:none;font-size:12px;font-family:var(--serif);color:var(--text-dim);background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:4px;padding:10px 14px;margin-bottom:12px;">
+      Your previous evidence is preserved below — resubmit it against your revised claim, or rewrite it.
+    </div>
     <textarea id="evidence-input" placeholder="Write your evidence here..."></textarea>
     <div class="input-footer">
       <div class="word-count" id="evidence-wc">0 words</div>
@@ -469,6 +472,12 @@ function showStepFeedback(step, text, feedback) {
   }
   html += '</div>';
 
+  if (step === "evidence") {
+    html += `<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.07);text-align:center;">
+      <button class="ghost-btn" style="font-size:11px;color:var(--c-color);opacity:0.8;" onclick="reviseClaim()">↑ REVISE MY CLAIM INSTEAD</button>
+    </div>`;
+  }
+
   fb.innerHTML = html;
   fb.classList.add("show");
 
@@ -494,6 +503,38 @@ function retryStep(step) {
   input.focus();
 }
 
+function reviseClaim() {
+  approvedClaim = "";
+
+  // Reset claim node and connector
+  document.getElementById("node-c").classList.remove("done");
+  document.getElementById("node-c").classList.add("active-c");
+  document.getElementById("conn-ce").classList.remove("done");
+
+  // Re-open claim for editing
+  const claimInput = document.getElementById("claim-input");
+  claimInput.disabled = false;
+  document.getElementById("claim-btn").disabled = false;
+  document.getElementById("claim-btn").textContent = "SUBMIT CLAIM";
+  const fbClaim = document.getElementById("fb-claim");
+  fbClaim.classList.remove("show");
+  fbClaim.innerHTML = "";
+
+  // Reset evidence evaluation state (text is preserved — student decides whether to keep or rewrite)
+  document.getElementById("phase-evidence").style.display = "none";
+  document.getElementById("evidence-input").disabled = false;
+  document.getElementById("evidence-btn").disabled = false;
+  document.getElementById("evidence-btn").textContent = "SUBMIT EVIDENCE";
+  const fbEvidence = document.getElementById("fb-evidence");
+  fbEvidence.classList.remove("show");
+  fbEvidence.innerHTML = "";
+  document.getElementById("error-evidence").classList.remove("show");
+  document.getElementById("node-e").className = "step-node";
+
+  claimInput.focus();
+  document.getElementById("phase-claim").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function forceAdvance(step) {
   const text = document.getElementById(step + "-input").value.trim();
   if (step === "claim") approvedClaim = text;
@@ -515,6 +556,8 @@ function advanceStep(fromStep, toStep) {
 
   if (toStep === "evidence") {
     document.getElementById("locked-claim-text").textContent = approvedClaim;
+    const hasPreservedEvidence = document.getElementById("evidence-input").value.trim();
+    document.getElementById("evidence-revised-note").style.display = hasPreservedEvidence ? "block" : "none";
   }
   if (toStep === "reasoning") {
     document.getElementById("locked-claim-text-2").textContent = approvedClaim;
@@ -556,6 +599,8 @@ function resetAll() {
   approvedClaim = "";
   approvedEvidence = "";
   approvedReasoning = "";
+
+  document.getElementById("evidence-revised-note").style.display = "none";
 
   ["claim", "evidence", "reasoning"].forEach(function(step) {
     document.getElementById(step + "-input").value = "";
