@@ -25,12 +25,6 @@ All content is thematically tied to the **2011 AP Lang Argument prompt** (Thomas
 | `config.js` | Shared API key + password config (key is a placeholder in source) | Injected at deploy time via GitHub Actions |
 | `styles.css` | Shared dark theme, typography, button styles | All activity pages |
 | `api.js` | Shared Gemini API call function with error handling and header auth | All activity pages |
-| `reasoning_gauntlet.jsx` | Claude.ai artifact version of the Gauntlet | Runs inside Claude.ai chat using built-in Anthropic API access |
-| `reasoning_gauntlet_standalone.html` | Legacy standalone Reasoning Gauntlet | Netlify drag-and-drop (no git deployment) |
-| `diagnosis_lab_standalone.html` | Legacy standalone Diagnosis Lab | Netlify drag-and-drop (no git deployment) |
-| `step_builder_standalone.html` | Legacy standalone C.E.R. Step-Builder | Netlify drag-and-drop (no git deployment) |
-| `ap_lang_argument_cheat_sheet.html` | Legacy printable cheat sheet | Static HTML |
-| `gemini_key_tester.html` | Debug tool for testing Gemini API keys | Open locally — but NOTE: local file testing triggers CORS errors (see bugs) |
 | `.github/workflows/deploy.yml` | GitHub Actions workflow: injects API key at build time, deploys to GitHub Pages | Runs on every push to `main` |
 
 ---
@@ -66,19 +60,6 @@ The Actions workflow triggers automatically. Watch progress at https://github.co
 - **Referrer restriction gotcha:** Must allow `https://dkp-810.github.io/*` (root domain wildcard), not just `/ap-lang-cer/*`. Browsers send the root origin as the referer header. See Bug #8.
 
 ---
-
-## Deployment: Standalone Activities (Netlify — Legacy)
-
-The three `*_standalone.html` files are the original single-file versions. Still usable for Netlify drag-and-drop deployment without git. **Do not push these files with a real API key to any public repo.**
-
-### Setup Steps
-1. Get a free Gemini API key at https://aistudio.google.com/apikey
-2. Open the HTML file and replace `YOUR_GEMINI_API_KEY_HERE` in the CONFIG section with the actual key
-3. Place the file (renamed `index.html`) inside a folder and drag the folder to https://app.netlify.com/drop
-
-### Critical Details
-- **Password:** `APLangRulez`
-- **Redeployment:** Always drag a folder, not a single file.
 
 ---
 
@@ -117,16 +98,7 @@ The three `*_standalone.html` files are the original single-file versions. Still
   document.querySelector(".hint-btn").textContent = "SHOW HINT";
   ```
 
-### 4. Local HTML File Testing Triggers CORS Errors
-- **Symptom:** `gemini_key_tester.html` opened locally via `file://` shows "Failed to fetch" / "CORS error"
-- **Cause:** Browsers block cross-origin requests from `file://` origins. This is a browser security policy, not an API issue.
-- **Workaround:** Test from a deployed URL (Netlify) or use a local dev server (`python3 -m http.server`). The key tester is useful for deployed debugging but misleading when opened locally.
-
-### 5. Netlify Deployment Requires a Folder
-- **Symptom:** Dragging a single HTML file to Netlify sometimes doesn't update the site or produces errors
-- **Fix:** Always place `index.html` inside a folder and drag the folder to the Netlify drop zone. This is consistent and reliable.
-
-### 6. Step-Builder Spinner Keeps Spinning After Feedback (FIXED)
+### 4. Step-Builder Spinner Keeps Spinning After Feedback (FIXED)
 - **Symptom:** In the Step-Builder, the submit button stays in "ANALYZING..." state with a spinning animation even after feedback has rendered
 - **Cause:** The button was only being reset in the `retryStep()` path, not in `showStepFeedback()`. On a PASS verdict, the user advances to the next step and the old button just sits there spinning.
 - **Fix:** Added button reset at the top of `showStepFeedback()`:
@@ -136,23 +108,22 @@ The three `*_standalone.html` files are the original single-file versions. Still
   btn.textContent = "SUBMIT " + step.toUpperCase();
   ```
 
-### 8. Gemini API Referrer Restriction Must Use Root Domain Wildcard
+### 5. Gemini API Referrer Restriction Must Use Root Domain Wildcard
 - **Symptom:** `Requests from referer https://dkp-810.github.io/ are blocked. [status: 403]` even though the page is at `/ap-lang-cer/`
 - **Cause:** Browsers send the root origin (`https://dkp-810.github.io/`) as the HTTP referer header, not the full page path. The restriction `https://dkp-810.github.io/ap-lang-cer/*` doesn't match it.
 - **Fix:** In Google Cloud Console, add `https://dkp-810.github.io/*` as an allowed referrer (keep the path-specific one too). The root domain wildcard is what actually gets matched.
 
-### 9. Step-Builder Submit Button Allows Double-Clicks (KNOWN, NOT YET FIXED)
+### 6. Step-Builder Submit Button Allows Double-Clicks (KNOWN, NOT YET FIXED)
 - **Symptom:** After feedback renders and the submit button resets, users can click SUBMIT again and fire duplicate API calls for the same text
-- **Cause:** The button re-enables when feedback renders (from bug #6 fix), but isn't hidden or locked during the feedback phase
+- **Cause:** The button re-enables when feedback renders (from bug #4 fix), but isn't hidden or locked during the feedback phase
 - **Recommended fix for Claude Code:** Either hide the submit button entirely when feedback is showing, or disable it when `fb-[step]` has the `.show` class. The textarea should also stay disabled while feedback is visible — only `retryStep()` should re-enable both.
 
 ---
 
 ## Architecture & Design Decisions
 
-### Two Versions Exist for Different Use Cases
-- **JSX version (Claude.ai):** Uses Anthropic's built-in API access inside artifacts. No API key needed. Best for whole-class live demos where the teacher drives the activity on their own Claude account.
-- **Standalone HTML (Netlify):** Uses Gemini free tier. Each student accesses independently via URL. Best for individual practice.
+### Deployment Architecture
+GitHub Pages serves the multi-page site (`index.html` → activity pages). The API key lives in a GitHub Actions secret and is injected into `config.js` at build time via `sed` — it never appears in the repo source. All activity pages load `config.js` and `api.js` as shared scripts.
 
 ### Gemini Free Tier Limits (as of May 2026, post-December 2025 quota cuts)
 - `gemini-2.5-flash`: **20 RPD hard cap** per project (confirmed in Cloud Console) — unusable for a class
