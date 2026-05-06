@@ -23,5 +23,7 @@ async function callGemini(systemPrompt, userMessage) {
   }
 
   const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  return JSON.parse(raw.replace(/```json|```/g, "").trim());
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("Could not parse feedback from AI response.");
+  return JSON.parse(match[0]);
 }
