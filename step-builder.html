@@ -242,12 +242,12 @@
   <div id="phase-claim" style="display:none;">
     <div class="challenge-box" style="border-color:rgba(224,82,82,0.3);background:rgba(224,82,82,0.05);color:#c8b0b0;">
       <span>📌</span>
-      <span><strong>STEP 1 — CLAIM:</strong> Write a defensible thesis that takes a position on the extent to which Curbelo's claim about fear-based persuasion is valid. Don't just summarize what Curbelo said — argue something about it.</span>
+      <span><strong>STEP 1 — INTRO PARAGRAPH:</strong> Write a complete introduction. Start with <strong>context</strong> that frames the issue of fear-based persuasion and why it matters. Then briefly acknowledge that <strong>reasonable people disagree</strong> on whether Curbelo's claim holds up — no evidence needed, just gesture at the debate. End with your <strong>central thesis</strong>: a defensible position on the extent to which Curbelo's claim is valid. Full agreement or full disagreement are both fine — just make it arguable.</span>
     </div>
-    <textarea id="claim-input" placeholder="Write your claim / thesis here..."></textarea>
+    <textarea id="claim-input" placeholder="Write your intro paragraph here — context, differing views, then your thesis..."></textarea>
     <div class="input-footer">
       <div class="word-count" id="claim-wc">0 words</div>
-      <button class="submit-btn c-btn" id="claim-btn" onclick="submitStep('claim')">SUBMIT CLAIM</button>
+      <button class="submit-btn c-btn" id="claim-btn" onclick="submitStep('claim')">SUBMIT INTRO</button>
     </div>
     <div class="error-box" id="error-claim"></div>
     <div class="feedback-inline" id="fb-claim" style="border:1px solid rgba(224,82,82,0.3);background:rgba(224,82,82,0.05);"></div>
@@ -256,7 +256,7 @@
   <!-- Phase: Evidence -->
   <div id="phase-evidence" style="display:none;">
     <div class="locked-section unlocked" id="locked-claim">
-      <div class="locked-label" style="color:var(--c-color);">YOUR CLAIM ✓</div>
+      <div class="locked-label" style="color:var(--c-color);">YOUR INTRO ✓</div>
       <div class="locked-text" id="locked-claim-text"></div>
     </div>
     <div class="challenge-box" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.05);color:#c8c0b0;">
@@ -278,7 +278,7 @@
   <!-- Phase: Reasoning -->
   <div id="phase-reasoning" style="display:none;">
     <div class="locked-section unlocked" id="locked-claim-2">
-      <div class="locked-label" style="color:var(--c-color);">YOUR CLAIM ✓</div>
+      <div class="locked-label" style="color:var(--c-color);">YOUR INTRO ✓</div>
       <div class="locked-text" id="locked-claim-text-2"></div>
     </div>
     <div class="locked-section unlocked" id="locked-evidence">
@@ -309,7 +309,7 @@
         <div class="assembled-text" id="assembled-text"></div>
       </div>
       <div class="cer-legend">
-        <span><span class="dot" style="background:var(--c-color);"></span> CLAIM</span>
+        <span><span class="dot" style="background:var(--c-color);"></span> INTRO</span>
         <span><span class="dot" style="background:var(--e-color);"></span> EVIDENCE</span>
         <span><span class="dot" style="background:var(--r-color);"></span> REASONING</span>
       </div>
@@ -325,25 +325,31 @@ if (sessionStorage.getItem("auth") !== "1") { window.location.href = "index.html
 document.getElementById("app").style.display = "block";
 
 const PROMPTS = {
-  claim: `You are an AP Language and Composition writing coach. Evaluate this student's CLAIM (thesis) for an argument essay about the extent to which Curbelo's claim about fear-based persuasion is valid.
+  claim: `You are an AP Language and Composition writing coach. Evaluate this student's INTRODUCTION PARAGRAPH for an argument essay about the extent to which Curbelo's claim about fear-based persuasion is valid.
 
-A good claim:
-- Takes a DEFENSIBLE POSITION (arguable, not a fact or summary)
-- Is QUALIFIABLE (not absolute — uses "largely," "to a significant extent," "when X," etc.)
-- Addresses the PROMPT (the extent to which Curbelo's claim holds true)
-- Is SPECIFIC enough to guide body paragraphs
+A strong intro paragraph has three components:
+1. CONTEXT — opens by framing the issue of fear-based persuasion (what it is, why it matters, or a relevant framing). Does not need statistics or cited sources.
+2. DIFFERING VIEWS — briefly acknowledges that reasonable people disagree on whether Curbelo's claim holds up. No evidence or reasoning required — just an acknowledgment that the debate exists.
+3. THESIS — ends with a clear, defensible position on the extent to which Curbelo's claim is valid.
+
+On the thesis specifically:
+- Full AGREEMENT ("Curbelo is correct") is a completely valid position — do NOT push students to qualify if they've taken a clear stance
+- Full DISAGREEMENT ("Curbelo's claim is flawed") is equally valid
+- Nuanced/qualified positions are also fine
+- The ONLY thesis to flag is a logically unfalsifiable absolute: "fear ALWAYS fails, no exceptions" or "fear NEVER works under any circumstances"
+- A thesis that simply restates what Curbelo said without taking a position is not acceptable
 
 RESPOND ONLY with JSON:
-{"verdict": "PASS or PUSH HARDER or TRY AGAIN", "analysis": "2 sentences max. Be conversational, direct, specific. If the claim just restates Curbelo or states an obvious fact, call it out. If it's defensible, say what makes it work.", "nudge": "1 sentence — concrete fix if needed, or brief acknowledgment if passed."}
+{"verdict": "PASS or PUSH HARDER or TRY AGAIN", "analysis": "2-3 sentences max. Evaluate all three components. Be conversational and direct. If something is missing or weak, name it specifically. Do not penalize a student for fully agreeing or fully disagreeing with Curbelo.", "nudge": "1 sentence — concrete next move if needed, or brief acknowledgment if passed."}
 
 CALIBRATION:
-- PASS = Defensible, arguable, addresses the prompt, specific enough to build on
-- PUSH HARDER = Has a position but it's too vague, too absolute, or doesn't fully address the prompt
-- TRY AGAIN = Summary, fact, or doesn't take a position at all`,
+- PASS = Has context, gestures at differing views, ends with a clear arguable thesis — full agreement or disagreement counts
+- PUSH HARDER = Missing or weak on one component (no context, no acknowledgment of debate, or thesis is vague/just restates Curbelo)
+- TRY AGAIN = No intro structure at all, or no real position taken`,
 
   evidence: `You are an AP Language and Composition writing coach. Evaluate this student's EVIDENCE for an argument essay about the validity of Curbelo's claim that fear-based persuasion is not always effective and can sow resentment.
 
-Their CLAIM (already approved): {claim}
+Their INTRO PARAGRAPH (already approved — their thesis is the final sentence): {claim}
 
 IMPORTANT CONTEXT: This is an AP exam simulation. Students are writing from memory without access to research, data, or statistics. Do NOT penalize students for lacking specific numbers, percentages, or cited studies. What matters is whether they can name a specific, real example (a historical event, a named program, a real person, a documented situation) and connect it to the claim. A well-chosen example described in general terms is better evidence than a vague gesture toward "many studies."
 
@@ -362,7 +368,7 @@ CALIBRATION:
 
   reasoning: `You are an AP Language and Composition writing coach. Evaluate this student's REASONING — the analytical connector between their claim and evidence.
 
-Their CLAIM: {claim}
+Their INTRO PARAGRAPH (thesis is the final sentence): {claim}
 Their EVIDENCE: {evidence}
 
 Good reasoning:
@@ -405,10 +411,10 @@ async function submitStep(step) {
   const errorBox = document.getElementById("error-" + step);
   const btn = document.getElementById(step + "-btn");
 
-  const minWords = step === "claim" ? 8 : 10;
+  const minWords = step === "claim" ? 40 : 10;
   if (!text || text.split(/\s+/).length < minWords) {
     errorBox.textContent = step === "claim"
-      ? "A thesis needs at least a full sentence."
+      ? "Write a full intro paragraph — at least a few sentences with context, differing views, and your thesis."
       : "Give me more to work with — at least a couple sentences.";
     errorBox.classList.add("show");
     return;
