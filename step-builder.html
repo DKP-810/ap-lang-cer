@@ -191,6 +191,20 @@
   .reset-btn { border-color: var(--c-color); color: var(--c-color); }
   .reset-btn:hover { background: rgba(224,82,82,0.08); }
 
+  .copy-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--text-faint);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { border-color: var(--text-dim); color: var(--text-dim); }
+
   @media (max-width: 500px) {
     .step-node { width: 34px; height: 34px; font-size: 15px; }
   }
@@ -247,6 +261,7 @@
     <textarea id="claim-input" placeholder="Write your intro paragraph here — context, differing views, then your thesis..."></textarea>
     <div class="input-footer">
       <div class="word-count" id="claim-wc">0 words</div>
+      <button class="copy-btn" id="claim-copy-btn" onclick="copyStep('claim')">COPY</button>
       <button class="submit-btn c-btn" id="claim-btn" onclick="submitStep('claim')">SUBMIT INTRO</button>
     </div>
     <div class="error-box" id="error-claim"></div>
@@ -269,6 +284,7 @@
     <textarea id="evidence-input" placeholder="Write your evidence here..."></textarea>
     <div class="input-footer">
       <div class="word-count" id="evidence-wc">0 words</div>
+      <button class="copy-btn" id="evidence-copy-btn" onclick="copyStep('evidence')">COPY</button>
       <button class="submit-btn e-btn" id="evidence-btn" onclick="submitStep('evidence')">SUBMIT EVIDENCE</button>
     </div>
     <div class="error-box" id="error-evidence"></div>
@@ -292,6 +308,7 @@
     <textarea id="reasoning-input" placeholder="Write your reasoning here..."></textarea>
     <div class="input-footer">
       <div class="word-count" id="reasoning-wc">0 words</div>
+      <button class="copy-btn" id="reasoning-copy-btn" onclick="copyStep('reasoning')">COPY</button>
       <button class="submit-btn r-btn" id="reasoning-btn" onclick="submitStep('reasoning')">SUBMIT REASONING</button>
     </div>
     <div class="error-box" id="error-reasoning"></div>
@@ -398,12 +415,35 @@ let approvedClaim = "";
 let approvedEvidence = "";
 let approvedReasoning = "";
 
+const SUBMIT_LABELS = { claim: "SUBMIT INTRO", evidence: "SUBMIT EVIDENCE", reasoning: "SUBMIT REASONING" };
+
+// Restore any in-progress work saved from a previous session
+["claim", "evidence", "reasoning"].forEach(function(step) {
+  const saved = localStorage.getItem("cer_sb_" + step);
+  if (saved) {
+    document.getElementById(step + "-input").value = saved;
+    const w = saved.trim() ? saved.trim().split(/\s+/).length : 0;
+    document.getElementById(step + "-wc").textContent = w + " words";
+  }
+});
+
 ["claim", "evidence", "reasoning"].forEach(function(step) {
   document.getElementById(step + "-input").addEventListener("input", function() {
     const w = this.value.trim() ? this.value.trim().split(/\s+/).length : 0;
     document.getElementById(step + "-wc").textContent = w + " words";
+    localStorage.setItem("cer_sb_" + step, this.value);
   });
 });
+
+function copyStep(step) {
+  const text = document.getElementById(step + "-input").value;
+  if (!text.trim()) return;
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.getElementById(step + "-copy-btn");
+    btn.textContent = "COPIED ✓";
+    setTimeout(function() { btn.textContent = "COPY"; }, 1500);
+  });
+}
 
 function startBuilder() {
   document.getElementById("phase-start").style.display = "none";
@@ -443,7 +483,7 @@ async function submitStep(step) {
     errorBox.textContent = "Connection issue — " + (err.message || "try again.");
     errorBox.classList.add("show");
     btn.disabled = false;
-    btn.textContent = "SUBMIT " + step.toUpperCase();
+    btn.textContent = SUBMIT_LABELS[step];
     input.disabled = false;
   }
 }
@@ -453,7 +493,7 @@ function showStepFeedback(step, text, feedback) {
   // FIX for Bug #7: button only re-enables via retryStep()
   const btn = document.getElementById(step + "-btn");
   btn.disabled = true;
-  btn.textContent = "SUBMIT " + step.toUpperCase();
+  btn.textContent = SUBMIT_LABELS[step];
 
   const fb = document.getElementById("fb-" + step);
   const color = feedback.verdict === "PASS" ? "var(--pass)" :
@@ -513,7 +553,7 @@ function retryStep(step) {
   input.disabled = false;
   const btn = document.getElementById(step + "-btn");
   btn.disabled = false;
-  btn.textContent = "SUBMIT " + step.toUpperCase();
+  btn.textContent = SUBMIT_LABELS[step];
   document.getElementById("fb-" + step).classList.remove("show");
   input.focus();
 }
@@ -618,11 +658,13 @@ function resetAll() {
   document.getElementById("evidence-revised-note").style.display = "none";
 
   ["claim", "evidence", "reasoning"].forEach(function(step) {
+    localStorage.removeItem("cer_sb_" + step);
     document.getElementById(step + "-input").value = "";
     document.getElementById(step + "-input").disabled = false;
     document.getElementById(step + "-wc").textContent = "0 words";
     document.getElementById(step + "-btn").disabled = false;
-    document.getElementById(step + "-btn").textContent = "SUBMIT " + step.toUpperCase();
+    document.getElementById(step + "-btn").textContent = SUBMIT_LABELS[step];
+    document.getElementById(step + "-copy-btn").textContent = "COPY";
     document.getElementById("fb-" + step).classList.remove("show");
     document.getElementById("fb-" + step).innerHTML = "";
     document.getElementById("error-" + step).classList.remove("show");
