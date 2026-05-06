@@ -182,7 +182,25 @@ For AP Lang/Psych student feedback: keep commentary very brief, conversational, 
 ## Next Steps
 
 1. **Fix Bug #6** (Step-Builder double-click) — hide or disable the submit button while feedback is visible
-2. **Consider a serverless proxy** (Netlify Functions) if the key ever needs to be truly hidden from View Source — low priority given domain restrictions already in place
+2. **Add post-feedback coaching chat to Step-Builder** — after a PUSH HARDER verdict, allow students to have a limited back-and-forth conversation with the LLM about their work before revising. See design decision below.
+3. **Consider a serverless proxy** (Netlify Functions) if the key ever needs to be truly hidden from View Source — low priority given domain restrictions already in place
+
+### Planned Feature: Step-Builder Post-Feedback Chat
+
+**The idea:** After a PUSH HARDER verdict, instead of just a REVISE button, students get a coaching chat input to ask follow-up questions before revising. Does NOT apply to PASS (nothing to discuss) or TRY AGAIN (student needs to start over).
+
+**Two implementation options under consideration:**
+
+- **Option A — Single follow-up (recommended starting point):** One question, one contextual answer, then student revises. Max 1 extra API call per step. Simple to implement, low rate limit risk, pedagogically sound (forces students to identify *what* they don't understand).
+- **Option B — Full multi-turn chat:** True back-and-forth conversation with history. More powerful, requires redesigning `api.js` for multi-turn support, significant rate limit risk. Would need a hard cap (~4 exchanges) to prevent quota abuse.
+
+**Recommendation:** Build Option A first — solves 80% of the need at 20% of the complexity. Design it so Option B is a clean upgrade path later.
+
+**Technical notes for implementation:**
+- Gemini API supports multi-turn via an array of alternating `user`/`model` entries in `contents` — `systemInstruction` stays the same
+- Current `api.js` only supports single-turn; multi-turn needs either an extended function or a second function
+- Rate limit risk is the primary constraint — with `gemini-2.5-flash-lite`, a class of 30 students each asking 5 chat messages per step could exhaust the daily quota before anyone finishes
+- For Option A: seed the LLM with the original system prompt context + student's submission + the feedback already given, so it can answer contextually
 
 ### Recurring Bug Pattern: Button/Input State Management
 Bugs #3, #4, and #6 all stem from the same root issue: submit buttons and textareas get `disabled = true` during API calls but aren't consistently re-enabled or hidden across all code paths (success, failure, retry, advance). **When refactoring, centralize UI state management** — a single `setPhaseState(phase)` function that handles which elements are visible, enabled, and focused for each phase would eliminate this entire class of bugs.
